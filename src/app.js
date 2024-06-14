@@ -329,7 +329,7 @@ app.get('/nuevoUsuario', (req, res) => {
 
 // Ruta para guardar un nuevo empleado
 app.post('/guardarEmpleado', (req, res) => {
-    const { nombre, apellido,tipo, email,documento, telefono, direccion, fechaNacimiento, rol } = req.body;
+    const { nombre, apellido,tipo, email,documento,sexo, telefono, direccion, fechaNacimiento, rol } = req.body;
 
     // Verificar si el email ya está registrado
     const sqlCheckEmail = 'SELECT COUNT(*) AS count FROM empleados WHERE email = ?';
@@ -355,6 +355,7 @@ app.post('/guardarEmpleado', (req, res) => {
             email,
             tipo,
             documento,
+            sexo,
             telefono,
             direccion,
             fechaNacimiento,
@@ -451,6 +452,71 @@ function enviarCorreo(email, nombre, clave) {
         }
     });
 }
+
+
+
+
+
+
+
+
+
+
+// Ruta para la página principal 
+app.get("/menuempresa", (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        console.log(`El usuario ${nombreUsuario} está autenticado.`);
+        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
+
+        const rolesString = req.session.roles;
+        const roles = Array.isArray(rolesString) ? rolesString : [];
+
+
+
+        const jefe = roles.includes('jefe');
+        const empleado = roles.includes('empleado');
+ 
+
+        res.render("EMPRESA/menuempresa.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+// Ruta para la página principal 
+app.get("/menuempleados", (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        console.log(`El usuario ${nombreUsuario} está autenticado.`);
+        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
+
+        const rolesString = req.session.roles;
+        const roles = Array.isArray(rolesString) ? rolesString : [];
+
+
+
+        const jefe = roles.includes('jefe');
+        const empleado = roles.includes('empleado');
+ 
+
+        res.render("EMPLEADOS/menuempleados.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
+
+
+
+
+
+
 
 
 

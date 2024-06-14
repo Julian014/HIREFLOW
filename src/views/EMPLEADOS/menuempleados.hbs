@@ -1,0 +1,618 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-jghRirIr6ZkPHymB08V4ZyZ8SuTRTBrgeX3RsJj/iqly8KxvQ4H9x8XtRvF3h1oElDnb4AgSvHrFwoC4tb6XKg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <title>Document</title>
+</head>
+<body>
+<style>
+    @import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+}
+@import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
+.fa-2x {
+font-size: 2em;
+}
+.fa {
+position: relative;
+display: table-cell;
+width: 90px;
+height: 46px;
+text-align: center;
+vertical-align: middle;
+font-size:50px;
+|}
+
+
+.main-menu:hover,nav.main-menu.expanded {
+width:250px;
+overflow:visible;
+}
+
+.main-menu {
+background:#132e3e;
+border-right:2px solid white;
+position:absolute;
+top:0;
+bottom:0;
+height:100%;
+left:0;
+width:80px;
+overflow:hidden;
+-webkit-transition:width .05s linear;
+transition:width .05s linear;
+-webkit-transform:translateZ(0) scale(1,1);
+z-index:1000;
+}
+
+.main-menu>ul {
+margin:7px 0;
+}
+
+.main-menu li {
+position:relative;
+display:block;
+width:250px;
+}
+
+.main-menu li>a {
+position:relative;
+display:table;
+border-collapse:collapse;
+border-spacing:0;
+color:white;
+ font-family: arial;
+font-size: 19px;
+text-decoration:none;
+-webkit-transform:translateZ(0) scale(1,1);
+-webkit-transition:all .1s linear;
+transition:all .1s linear;
+  
+}
+
+.main-menu .nav-icon {
+position:relative;
+display:table-cell;
+width:60px;
+height:36px;
+text-align:center;
+vertical-align:middle;
+font-size:18px;
+}
+
+.main-menu .nav-text {
+position:relative;
+display:table-cell;
+vertical-align:middle;
+width:190px;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.main-menu>ul.logout {
+position:absolute;
+left:0;
+bottom:0;
+}
+
+.no-touch .scrollable.hover {
+overflow-y:hidden;
+}
+
+.no-touch .scrollable.hover:hover {
+overflow-y:auto;
+overflow:visible;
+}
+
+a:hover,a:focus {
+text-decoration:none;
+}
+
+nav {
+-webkit-user-select:none;
+-moz-user-select:none;
+-ms-user-select:none;
+-o-user-select:none;
+user-select:none;
+}
+
+nav ul,nav li {
+outline:0;
+margin:0;
+padding:0;
+}
+.main-menu li:hover>a,nav.main-menu li.active>a,.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus,.dropdown-menu>.active>a,.dropdown-menu>.active>a:hover,.dropdown-menu>.active>a:focus,.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,.dashboard-page nav.dashboard-menu ul li.active a {
+color:#fff;
+background-color:#000000;
+}
+.area {
+float: left;
+background: #e2e2e2;
+width: 100%;
+height: 100%;
+}
+
+
+
+
+
+
+
+@font-face {
+  font-family: 'Titillium Web';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+}
+body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+     
+
+      background-color: #90c9a7;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      max-width: 90%;
+      margin: 80px auto 20px;
+    }
+
+    .tarjeta {
+      width: 280px;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .tarjeta:hover {
+      transform: translateY(-10px);
+    }
+
+    .imagen-circulo {
+      width: 100%;
+      height: 120px;
+      overflow: hidden;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .imagen-circulo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .titulo {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 15px 10px;
+      text-align: center;
+    }
+
+    .cuerpo {
+      padding: 15px 10px;
+    }
+
+    .cuerpo a {
+      display: block;
+      padding: 8px 0;
+      text-decoration: none;
+      color: #333;
+      text-align: center;
+      border-top: 1px solid #ccc;
+    }
+
+    .pie {
+      background:  #90c9a7;
+      border-radius: 0 0 15px 15px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .pie a {
+      text-decoration: none;
+      color: black;
+    }
+      header{
+padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+    z-index: 1500; /* Asegura que esté por encima del encabezado */
+
+
+  }
+
+
+    header{
+   left: 4%;
+padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+    z-index: 1500; /* Asegura que esté por encima del encabezado */
+
+
+    }
+   #ingreso{
+    padding: 4px;
+   border-radius: 3px;
+    text-align: center;
+    font-size: 30px;
+    position: relative;
+    width: 10%;
+   color: black;
+   left: 10%;
+    top: -20%;
+float: none;
+
+   }
+
+.opera{
+    left: 10%;
+  align-items: center;
+  border-radius: 20px;
+  position: relative;
+  width: 20%;
+  padding: 5px;
+background-color: #ccc;
+text-align: center;
+
+
+}
+
+
+ </style>
+
+    <div class="area"></div><nav class="main-menu">
+            <ul>
+                <br>
+                <li>
+                    <a href="/">
+                        <i class="fa fa-home fa-2x"></i>
+                        <span class="nav-text">
+                          menu principal
+                        </span>
+                    </a>
+                  
+                </li>
+                <br>
+                  <br>
+                  <li>
+
+     <li>
+
+
+
+<li>
+    <a href="/menuempresa">
+        <i class="fa fa-building-o fa-2x"></i>
+        <span class="nav-text">
+            Menú Empresa
+        </span>
+    </a>
+</li>
+
+
+
+                  <br>
+                 
+                <br>
+                <li class="has-subnav">
+                    <a href="/menuempleados">
+        <i class="fa fa-user fa-2x"></i>
+                        <span class="nav-text">
+                                     menu empleados
+                        </span>
+                    </a>
+                    
+                </li>
+                <br> 
+                <br>
+
+            
+   
+
+            
+                           <li class="has-subnav">
+                    <a href="#">
+        <i class="fa fa-wrench fa-2x"></i>
+                        <span id="texx" class="nav-text">
+                            Soporte
+                        </span>
+                    </a>
+                   
+                </li>
+             <br>
+             <br>
+               <li class="has-subnav">
+                    <a href="#">
+        <i class="fa fa-cogs fa-2x"></i>
+                        <span class="nav-text">
+                            configuracion
+                        </span>
+                    </a>
+                    
+                </li>
+                <br>
+                <br>
+            </ul>
+
+ <ul class="logout"><li>
+<a href="/logout">
+<i class="fa fa-power-off fa-2x"></i>
+ <span class="nav-text">Logout</span>
+ </a>
+ </li>  
+ </ul>
+ </nav>
+
+
+
+
+  <header>
+
+    <h1 id="ingreso">BIENVENIDO {{name}}</h1>
+    
+  </header>
+
+
+
+<br>
+<br>
+<br>
+<div class="opera">
+<h1>MENU EMPLEADOS</h1>
+</div>
+
+
+
+
+
+
+
+
+<div class="menu">
+
+<div class="tarjeta">
+  <div class="imagen-circulo">
+<img src="imagenes/avion.png" alt="Imagen de la tarjeta">
+  </div>
+  <div class="titulo">INFORMACION PERSONAL</div>
+  <div class="cuerpo">
+        <a href="/nuevoUsuario">SUBIR DATOS</a>
+
+    <a href="">CONSULTAR INDIVIDUAL</a>
+
+         
+      
+  </div>
+  <div class="pie">
+    <a href="#">Más información</a>
+  </div>
+</div>
+<br>
+<br>
+
+
+
+<div class="tarjeta">
+  <div class="imagen-circulo">
+    <img src="imagenes/terceros.jpg" alt="Imagen de la tarjeta">
+  </div>
+  <div class="titulo">DOCUMENTACION</div>
+  <div class="cuerpo">
+        <a href="/SolictarServicioTerceros">SUBIR DOCUMENTACION</a>
+        <a href="/consultar_servicioT">VER MI DOCUMENTACION</a>
+
+  </div>
+  <div class="pie">
+    <a href="#">Más información</a>
+  </div>
+</div>
+<br>
+<br>
+
+<div class="tarjeta">
+  <div class="imagen-circulo">
+    <img src="imagenes/avion.png" alt="Imagen de la tarjeta">
+  </div>
+  <div class="titulo">CONTRATO</div>
+  <div class="cuerpo">
+
+    <a href="">FIRMAR CONTRATO</a>
+    <a href="">VER CONTRATO</a>
+
+         
+      
+  </div>
+  <div class="pie">
+    <a href="#">Más información</a>
+  </div>
+</div>
+<br>
+<br>
+
+
+
+<br>
+<br>
+     
+
+
+
+
+<div class="tarjeta">
+  <div class="imagen-circulo">
+    <img src="imagenes/conductor.jpg" alt="Imagen de la tarjeta">
+  </div>
+  <div class="titulo">OTROS DOCUMENTOS</div>
+ <div class="cuerpo">
+
+     
+        <a href="/agregar-conductor">AGREGAR</a>
+
+        <a href="/consulta-conductores2">CONSULTAR</a>
+
+
+
+     
+  
+  </div>
+  <div class="pie">
+    <a href="#">Más información</a>
+  </div>
+</div>
+
+<br>
+<br>
+
+<br>
+
+
+<div class="tarjeta">
+  <div class="imagen-circulo">
+    <img src="imagenes/avion.png" alt="Imagen de la tarjeta">
+  </div>
+  <div class="titulo">EVALUAVION DE DESEMPEÑO</div>
+  <div class="cuerpo">
+
+    <a href="">REALIZAR EVALUAVION</a>
+    
+         
+    <a href="">CONSULTA MIS PRUEBAS</a>
+      
+  </div>
+  <div class="pie">
+    <a href="#">Más información</a>
+  </div>
+</div>
+<br>
+<br>
+
+
+
+
+
+
+
+
+
+ <script>
+    document.addEventListener('DOMContentLoaded', verificarNotificacionesPendientes);
+
+    async function verificarNotificacionesPendientes() {
+      try {
+        const response = await fetch('/verificar-notificaciones');
+        const data = await response.json();
+        if (data.notificacionesPendientes !== undefined) {
+          const numNotificacionesSinLeer = document.getElementById('numNotificacionesSinLeer');
+          numNotificacionesSinLeer.innerText = data.notificacionesPendientes;
+        }
+      } catch (error) {
+        console.error('Error al verificar las notificaciones pendientes:', error);
+      }
+    }
+
+async function mostrarNotificaciones(nombreUsuario) {
+  const contenedorNotificaciones = document.getElementById('ventanaEmergente');
+  contenedorNotificaciones.style.display = 'block';
+
+  try {
+    const response = await fetch(`/notificaciones-pendientes/${nombreUsuario}`);
+    const data = await response.json();
+    const notificacionesContainer = document.getElementById('notificacionesContainer');
+    notificacionesContainer.innerHTML = '';
+
+    if (data && Array.isArray(data)) {
+      data.forEach(notificacion => {
+        const notificacionElement = document.createElement('div');
+        notificacionElement.classList.add('notificacion');
+        notificacionElement.dataset.id = notificacion._id;
+        notificacionElement.innerHTML = `
+          <span class="mensaje">${notificacion.mensaje}</span>
+          <button class="marcarLeida" onclick="marcarComoLeida('${notificacion._id}')">Marcar como leída</button>
+          <button class="eliminar" onclick="eliminarNotificacion('${notificacion._id}', this)">Eliminar</button>
+        `;
+        notificacionesContainer.appendChild(notificacionElement);
+      });
+    } else {
+      console.error('Error: Unexpected data structure for notifications');
+    }
+  } catch (error) {
+    console.error('Error al cargar las notificaciones:', error);
+  }
+}
+
+
+    function cerrarVentanaEmergente() {
+      const ventanaEmergente = document.getElementById('ventanaEmergente');
+      ventanaEmergente.style.display = 'none';
+    }
+
+async function marcarComoLeida(id) {
+  try {
+    const response = await fetch(`/marcar-notificacion/${id}`, { method: 'PUT' });
+    if (response.ok) {
+      // Actualizar la interfaz de usuario según sea necesario
+    } else {
+      console.error('Error al marcar la notificación como leída');
+    }
+  } catch (error) {
+    console.error('Error al marcar la notificación como leída:', error);
+  }
+}
+
+
+    async function eliminarNotificacion(id, boton) {
+      try {
+        const response = await fetch(`/eliminar-notificacion/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+          const notificacion = boton.parentNode;
+          notificacion.parentNode.removeChild(notificacion);
+          const numNotificacionesSinLeer = document.getElementById('numNotificacionesSinLeer');
+          numNotificacionesSinLeer.innerText = parseInt(numNotificacionesSinLeer.innerText) - 1;
+        } else {
+          console.error('Error al eliminar la notificación');
+        }
+      } catch (error) {
+        console.error('Error al eliminar la notificación:', error);
+      }
+    }
+
+    setInterval(reproducirSonido, 5000);
+
+    function reproducirSonido() {
+      const audio = document.getElementById('notificationSound');
+      audio.play();
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
