@@ -301,11 +301,11 @@ app.get("/", (req, res) => {
 
 
 
-        const jefe = roles.includes('jefe');
+        const administrativo = roles.includes('administrativo');
         const empleado = roles.includes('empleado');
  
 
-        res.render("EMPRESA/home.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
+        res.render("EMPRESA/home.hbs",{ name: req.session.name,administrativo,empleado }); // Pasar los roles a la plantilla
     } else {
         res.redirect("/login");
     }
@@ -439,10 +439,43 @@ function enviarCorreo(email, nombre, clave) {
     const mailOptions = {
         from: 'nexus.innovationss@gmail.com', // Dirección del remitente
         to: email, // Dirección del destinatario
-        subject: 'Bienvenido a nuestra plataforma', // Asunto del correo
-        html: `<p>Hola ${nombre},</p>
-               <p>Gracias por registrarte. Tu clave de acceso es: <strong>${clave}</strong></p>`
+        subject: 'Bienvenido a nuestra Compañía', // Asunto del correo
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
+                    <img src="https://example.com/logo.png" alt="Logo de la empresa" style="max-width: 100px; height: auto;">
+                </div>
+                <div style="background-color: #ffffff; padding: 30px;">
+                    <h2 style="color: #333333; text-align: center;">¡Bienvenido a nuestra Compañía!</h2>
+                    <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+                        Hola <strong>${nombre}</strong>,
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+                        Estás a punto de continuar con el proceso. Este mensaje es enviado para que accedas a nuestra plataforma y subas la documentación solicitada en el <strong>módulo de MENÚ DE EMPLEADOS</strong>.
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.6; text-align: center;">
+                        <strong>Enlace de la plataforma:</strong> <a href="http://localhost:3000/login" style="color: #333333; text-decoration: none;">http://localhost:3000/login</a>
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.6;">
+                        Tus credenciales para ingresar son:
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 10px;">
+                        Correo: <strong>${email}</strong>
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 10px;">
+                        Contraseña: <strong>${clave}</strong>
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+                        Por favor, asegúrate de completar este paso lo antes posible.
+                    </p>
+                </div>
+                <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
+                    <p style="font-size: 14px; color: #666666;">Este es un mensaje automático. Por favor, no respondas a este correo.</p>
+                </div>
+            </div>
+        `
     };
+    
 
     transporter.sendMail(mailOptions, function(error, info){
         if (error) {
@@ -511,6 +544,211 @@ app.get("/menuempleados", (req, res) => {
 
 
 
+
+
+
+
+
+const moment = require('moment'); // Importa moment.js si no lo has hecho aún
+
+// Ruta para mostrar los datos del empleado y formulario para subir información adicional
+app.get('/subirinformacion', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+
+        // Consulta para obtener los datos del empleado
+        const sql = `SELECT id, nombre, apellido, tipo, documento, sexo, email, 
+                             telefono, direccion, fechaNacimiento, rol,
+                             tipo_sangre, estado_civil, emergencia_nombre, emergencia_telefono, foto
+                     FROM empleados 
+                     WHERE nombre = ?`;
+        connection.query(sql, [nombreUsuario], (err, resultados) => {
+            if (err) {
+                console.error('Error al obtener datos del empleado:', err);
+                return res.status(500).send('Error interno al procesar la solicitud');
+            }
+
+            if (resultados.length === 0) {
+                return res.status(404).send('Empleado no encontrado');
+            }
+
+            // Formatear la fecha de nacimiento
+            const empleado = resultados[0];
+            empleado.fechaNacimiento = moment(empleado.fechaNacimiento).format('DD MMMM YYYY');
+
+            // Pasar empleado a la plantilla
+            res.render('EMPLEADOS/documentos/subirinformacion', { empleado });
+        });
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+// Ruta para obtener la imagen del empleado por ID
+app.get('/imagen/:id', (req, res) => {
+    const empleadoId = req.params.id;
+
+    const sql = 'SELECT foto FROM empleados WHERE id = ?';
+    connection.query(sql, [empleadoId], (err, results) => {
+        if (err) {
+            console.error('Error al obtener la imagen:', err);
+            return res.status(500).send('Error interno al procesar la solicitud');
+        }
+
+        if (results.length > 0 && results[0].foto) {
+            // Escribir la imagen como respuesta
+            const image = results[0].foto;
+            res.writeHead(200, {
+                'Content-Type': 'image/jpeg',
+                'Content-Length': image.length
+            });
+            res.end(image); // Envía el BLOB como respuesta (en formato imagen)
+        } else {
+            return res.status(404).send('Imagen no encontrada');
+        }
+    });
+});
+
+
+
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+const storage = multer.memoryStorage();
+
+    const upload = multer({ storage: storage });
+
+
+    app.post('/update', upload.single('foto'), (req, res) => {
+        const empleado = req.body;
+        const foto = req.file; // Si no se sube ninguna foto, req.file será undefined
+    
+        let sql;
+        let sqlParams;
+    
+        if (foto) {
+            // Se subió una nueva foto, obtener los datos binarios
+            sql = `UPDATE empleados SET 
+                       direccion = ?, 
+                       tipo_sangre = ?, 
+                       estado_civil = ?, 
+                       emergencia_nombre = ?, 
+                       emergencia_telefono = ?, 
+                       foto = ?
+                   WHERE id = ?`;
+            sqlParams = [
+                empleado.direccion,
+                empleado.tipo_sangre,
+                empleado.estado_civil,
+                empleado.emergencia_nombre,
+                empleado.emergencia_telefono,
+                foto.buffer, // Foto como dato binario
+                empleado.id
+            ];
+        } else {
+            // No se subió ninguna nueva foto, actualizar sin el campo de foto
+            sql = `UPDATE empleados SET 
+                       direccion = ?, 
+                       tipo_sangre = ?, 
+                       estado_civil = ?, 
+                       emergencia_nombre = ?, 
+                       emergencia_telefono = ?
+                   WHERE id = ?`;
+            sqlParams = [
+                empleado.direccion,
+                empleado.tipo_sangre,
+                empleado.estado_civil,
+                empleado.emergencia_nombre,
+                empleado.emergencia_telefono,
+                empleado.id
+            ];
+        }
+    
+        connection.query(sql, sqlParams, (err, result) => {
+            if (err) {
+                console.error('Error al actualizar datos del empleado:', err);
+                return res.status(500).send('Error interno al procesar la solicitud');
+            }
+    
+            res.redirect('/subirinformacion');
+        });
+    });
+    
+
+
+
+
+
+
+
+
+
+
+
+// Ruta para obtener la imagen del empleado por ID
+app.get('/imagen/:id', (req, res) => {
+    const empleadoId = req.params.id;
+
+    const sql = 'SELECT foto FROM empleados WHERE id = ?';
+    connection.query(sql, [empleadoId], (err, results) => {
+        if (err) {
+            console.error('Error al obtener la imagen:', err);
+            return res.status(500).send('Error interno al procesar la solicitud');
+        }
+
+        if (results.length > 0 && results[0].foto) {
+            // Escribir la imagen como respuesta
+            const image = results[0].foto;
+            res.writeHead(200, {
+                'Content-Type': 'image/jpeg',
+                'Content-Length': image.length
+            });
+            res.end(image); // Envía el BLOB como respuesta (en formato imagen)
+        } else {
+            return res.status(404).send('Imagen no encontrada');
+        }
+    });
+});
+
+
+
+
+
+
+// Ruta para mostrar los datos del empleado y formulario para subir información adicional
+app.get('/mihojadevida', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+
+        // Consulta para obtener los datos del empleado
+        const sql = `SELECT id, nombre, apellido, tipo, documento, sexo, email, 
+                             telefono, direccion, fechaNacimiento, rol,
+                             tipo_sangre, estado_civil, emergencia_nombre, emergencia_telefono, foto
+                     FROM empleados 
+                     WHERE nombre = ?`;
+        connection.query(sql, [nombreUsuario], (err, resultados) => {
+            if (err) {
+                console.error('Error al obtener datos del empleado:', err);
+                return res.status(500).send('Error interno al procesar la solicitud');
+            }
+
+            if (resultados.length === 0) {
+                return res.status(404).send('Empleado no encontrado');
+            }
+
+            // Formatear la fecha de nacimiento
+            const empleado = resultados[0];
+            empleado.fechaNacimiento = moment(empleado.fechaNacimiento).format('DD MMMM YYYY');
+
+            // Pasar empleado a la plantilla
+            res.render('EMPLEADOS/mihojadevida.hbs', { empleado });
+        });
+    } else {
+        res.redirect("/login");
+    }
+});
 
 
 
