@@ -327,76 +327,97 @@ app.get('/nuevoUsuario', (req, res) => {
 
 
 
-
 // Ruta para guardar un nuevo empleado
 app.post('/guardarEmpleado', (req, res) => {
-    const { nombre, apellido, email, telefono, direccion, fechaNacimiento, rol } = req.body;
+    const { nombre, apellido,tipo, email,documento, telefono, direccion, fechaNacimiento, rol } = req.body;
 
-    // Generar una clave única para el empleado
-    const clave = generarClaveAleatoria(8); // Longitud de la clave: 8 caracteres
-
-    const nuevoEmpleado = {
-        nombre,
-        apellido,
-        email,
-        telefono,
-        direccion,
-        fechaNacimiento,
-        rol
-    };
-
-    const sqlEmpleado = 'INSERT INTO empleados SET ?';
-    const sqlUser = 'INSERT INTO user (name, email, password) VALUES (?, ?, ?)';
-
-    connection.beginTransaction(function(err) {
+    // Verificar si el email ya está registrado
+    const sqlCheckEmail = 'SELECT COUNT(*) AS count FROM empleados WHERE email = ?';
+    connection.query(sqlCheckEmail, [email], (err, results) => {
         if (err) {
-            console.error('Error al comenzar la transacción:', err);
-            return res.status(500).send('Error interno al guardar el empleado');
+            console.error('Error al verificar el correo electrónico:', err);
+            return res.status(500).send('Error interno al verificar el correo electrónico');
         }
 
-        // Insertar en la tabla empleados
-        connection.query(sqlEmpleado, nuevoEmpleado, (err, resultEmpleado) => {
+        const count = results[0].count;
+        if (count > 0) {
+            // El correo electrónico ya está registrado
+            return res.status(400).render('nuevosUsuarios/ingresarNuevo_usuario.hbs', {
+                error: 'El correo electrónico ya está registrado. Intente con otro correo.'
+            });
+        }
+
+        // Si el correo no está registrado, proceder con la inserción
+        const clave = generarClaveAleatoria(8); // Generar clave aleatoria
+        const nuevoEmpleado = {
+            nombre,
+            apellido,
+            email,
+            tipo,
+            documento,
+            telefono,
+            direccion,
+            fechaNacimiento,
+            rol
+        };
+
+        const sqlEmpleado = 'INSERT INTO empleados SET ?';
+        const sqlUser = 'INSERT INTO user (name, email, password) VALUES (?, ?, ?)';
+
+        connection.beginTransaction(function(err) {
             if (err) {
-                connection.rollback(function() {
-                    console.error('Error al guardar el empleado en la tabla "empleados":', err);
-                    return res.status(500).send('Error interno al guardar el empleado');
-                });
-            } else {
-                console.log('Nuevo empleado creado en la tabla "empleados":', resultEmpleado.insertId);
-
-                // Insertar en la tabla users
-                connection.query(sqlUser, [nombre, email, clave], (err, resultUser) => {
-                    if (err) {
-                        connection.rollback(function() {
-                            console.error('Error al guardar el empleado en la tabla "users":', err);
-                            return res.status(500).send('Error interno al guardar el empleado');
-                        });
-                    } else {
-                        console.log('Nuevo usuario creado en la tabla "users":', resultUser.insertId);
-
-                        // Commit la transacción si todo fue exitoso
-                        connection.commit(function(err) {
-                            if (err) {
-                                connection.rollback(function() {
-                                    console.error('Error al hacer commit de la transacción:', err);
-                                    return res.status(500).send('Error interno al guardar el empleado');
-                                });
-                            } else {
-                                console.log('Transacción completada, empleado y usuario creados correctamente.');
-
-                                // Envío de correo electrónico al empleado con la clave
-                                enviarCorreo(email, nombre, clave);
-
-                                // Redirigir al usuario a la página de nuevo usuario
-                                res.redirect('/nuevoUsuario');
-                            }
-                        });
-                    }
-                });
+                console.error('Error al comenzar la transacción:', err);
+                return res.status(500).send('Error interno al guardar el empleado');
             }
+
+            // Insertar en la tabla empleados
+            connection.query(sqlEmpleado, nuevoEmpleado, (err, resultEmpleado) => {
+                if (err) {
+                    connection.rollback(function() {
+                        console.error('Error al guardar el empleado en la tabla "empleados":', err);
+                        return res.status(500).send('Error interno al guardar el empleado');
+                    });
+                } else {
+                    console.log('Nuevo empleado creado en la tabla "empleados":', resultEmpleado.insertId);
+
+                    // Insertar en la tabla users
+                    connection.query(sqlUser, [nombre, email, clave], (err, resultUser) => {
+                        if (err) {
+                            connection.rollback(function() {
+                                console.error('Error al guardar el empleado en la tabla "users":', err);
+                                return res.status(500).send('Error interno al guardar el empleado');
+                            });
+                        } else {
+                            console.log('Nuevo usuario creado en la tabla "users":', resultUser.insertId);
+
+                            // Commit la transacción si todo fue exitoso
+                            connection.commit(function(err) {
+                                if (err) {
+                                    connection.rollback(function() {
+                                        console.error('Error al hacer commit de la transacción:', err);
+                                        return res.status(500).send('Error interno al guardar el empleado');
+                                    });
+                                } else {
+                                    console.log('Transacción completada, empleado y usuario creados correctamente.');
+
+                                    // Envío de correo electrónico al empleado con la clave
+                                    enviarCorreo(email, nombre, clave);
+
+                                    // Redirigir al usuario a la página de nuevo usuario
+                                    res.redirect('/nuevoUsuario');
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     });
 });
+
+
+
+
 
 // Función para generar clave aleatoria
 function generarClaveAleatoria(length) {

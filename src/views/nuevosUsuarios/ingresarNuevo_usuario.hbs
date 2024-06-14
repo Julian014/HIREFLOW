@@ -258,8 +258,12 @@ height: 100%;
                 </li>  
             </ul>
         </nav>
-    <div class="container">
-        <h2>Ingreso de Nuevo Usuario</h2>
+<div class="container">
+    <h2>Ingreso de Nuevo Usuario</h2>
+
+    {{#if error}}
+        <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
 
         <form action="/guardarEmpleado" method="POST">
             <label for="nombre">Nombre:</label>
@@ -267,6 +271,18 @@ height: 100%;
 
             <label for="apellido">Apellido:</label>
             <input type="text" id="apellido" name="apellido" required>
+
+
+
+
+            <label for="tipo">tipo:</label>
+            <input type="text" id="tipo" name="tipo" required>
+
+  <label for="documento">documento:</label>
+            <input type="text" id="documento" name="documento" required>
+
+
+
 
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
