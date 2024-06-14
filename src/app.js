@@ -11,7 +11,7 @@ app.set("views", __dirname + "/views");
 app.engine(".hbs", engine({ extname: ".hbs" }));  // Configura Handlebars como motor de vistas
 app.set("view engine", "hbs");
 
-// Middleware
+
 app.use(express.json());  // Middleware para parsear JSON en las solicitudes
 app.use(express.urlencoded({ extended: true }));  // Middleware para parsear URL-encoded en las solicitudes
 app.use(express.static(__dirname + '/public'));  // Middleware para servir archivos estáticos desde el directorio 'public'
