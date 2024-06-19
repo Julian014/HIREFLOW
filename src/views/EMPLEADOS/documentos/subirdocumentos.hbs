@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Documentos</title>
+</head>
+<body>
+    <h1>Subir Documentos</h1>
+    <form action="/subirdocumentos" method="POST" enctype="multipart/form-data">
+        <label for="documentoPDF">Seleccionar documento PDF:</label>
+        <input type="file" name="documentoPDF" id="documentoPDF" accept="application/pdf" required>
+        <button type="submit">Subir Documento</button>
+    </form>
+</body>
+</html>

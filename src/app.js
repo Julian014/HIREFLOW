@@ -762,6 +762,81 @@ app.get('/mihojadevida', (req, res) => {
 
 
 
+// Ruta para la página principal
+app.get("/subirdocumentos", (req, res) => {
+    if (req.session.loggedin === true) {
+      const nombreUsuario = req.session.name;
+      console.log(`El usuario ${nombreUsuario} está autenticado.`);
+      req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
+  
+      const rolesString = req.session.roles;
+      const roles = Array.isArray(rolesString) ? rolesString : [];
+  
+      const jefe = roles.includes('jefe');
+      const empleado = roles.includes('empleado');
+  
+      res.render("EMPLEADOS/documentos/subirdocumentos.hbs", { name: req.session.name, jefe, empleado }); // Pasar los roles a la plantilla
+    } else {
+      res.redirect("/login");
+    }
+  });
+  
+
+
+ 
+// Ruta para manejar la subida de documentos
+app.post("/subirdocumentos", upload.single('documentoPDF'), (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+
+        // Verificar si se subió correctamente el archivo
+        if (!req.file) {
+            res.status(400).send('No se ha subido ningún archivo.');
+            return;
+        }
+
+        // Obtener el documento del empleado usando el correo electrónico (nombre de usuario)
+        const getDocumentoQuery = 'SELECT documento FROM empleados WHERE nombre = ?';
+        connection.query(getDocumentoQuery, [nombreUsuario], (err, results) => {
+            if (err) {
+                console.error('Error al obtener el documento del empleado:', err);
+                res.status(500).send('Error al obtener el documento del empleado.');
+                return;
+            }
+
+            if (results.length > 0) {
+                const documentoEmpleado = results[0].documento;
+                
+                // Obtener el contenido del archivo subido como un Buffer
+                const documentoSubido = req.file.buffer;
+
+                // Insertar el documento (archivo subido) en la tabla documentos
+                const insertDocumentQuery = 'INSERT INTO documentos (usuario, cedula) VALUES (?, ?)';
+                connection.query(insertDocumentQuery, [nombreUsuario, documentoSubido], (err, result) => {
+                    if (err) {
+                        console.error('Error al guardar el archivo en la base de datos:', err);
+                        res.status(500).send('Error al guardar el archivo.');
+                    } else {
+                        res.send('Archivo subido exitosamente.');
+                    }
+                });
+            } else {
+                res.status(404).send('Empleado no encontrado.');
+            }
+        });
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
+
+
+
+
+
 
 // Start server
 app.listen(app.get("port"), () => {
