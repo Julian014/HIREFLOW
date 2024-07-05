@@ -2,7 +2,9 @@ const express = require("express");
 const session = require("express-session");
 const mysql = require("mysql2");
 const { engine } = require("express-handlebars");
-
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 app.set("port", process.env.PORT || 3000);
 
@@ -16,13 +18,20 @@ app.use(express.json());  // Middleware para parsear JSON en las solicitudes
 app.use(express.urlencoded({ extended: true }));  // Middleware para parsear URL-encoded en las solicitudes
 app.use(express.static(__dirname + '/public'));  // Middleware para servir archivos estáticos desde el directorio 'public'
 
-// Database connection
-const connection = mysql.createConnection({
+// Crea un pool de conexiones
+const pool = mysql.createPool({
     host: '127.0.0.1',
     user: 'root',
     password: '',
-    database: 'Recursos_Humanos'
+    database: 'Recursos_Humanos',
+    waitForConnections: true,
+    connectionLimit: 10, // Número máximo de conexiones en el pool
+    queueLimit: 0 // Número máximo de solicitudes en cola (0 = ilimitado)
 });
+
+// Exporta el pool para usarlo en otros módulos
+module.exports = pool;
+
 
 // Session middleware
 app.use(session({
@@ -31,28 +40,25 @@ app.use(session({
     saveUninitialized: true  // Forzar a que una sesión se guarde, aunque no haya datos para almacenar
 }));
 
-// Handle database errors and connection events
-connection.on('error', err => {
-    console.error("Database connection error:", err);  // Manejar errores de conexión a la base de datos
-});
 
-connection.on('close', () => {
-    console.log("Database connection closed");  // Registrar cuando se cierra la conexión a la base de datos
-});
 
-connection.connect(err => {
-    if (err) {
-        console.error("Database connection error:", err);  // Manejar errores de conexión a la base de datos al intentar conectar
-        return;
-    }
-    console.log("Connected to database");  // Confirmar conexión exitosa a la base de datos
-});
 
-// Middleware to pass db connection to request object
+
+// Middleware para pasar una conexión del pool a cada objeto de solicitud
 app.use((req, res, next) => {
-    req.db = connection;  // Middleware para pasar la conexión de base de datos a todos los objetos de solicitud
-    next();
+    pool.getConnection((err, connection) => {
+        if (err) {
+            return next(err);
+        }
+        req.db = connection;
+        res.on('finish', () => {
+            req.db.release();
+        });
+        next();
+    });
 });
+
+
 
 // Render login form
 app.get("/login", (req, res) => {
@@ -62,7 +68,6 @@ app.get("/login", (req, res) => {
         res.render("login/index.hbs", { error: null });  // Renderizar el formulario de inicio de sesión con un mensaje de error nulo
     }
 });
-
 
 
 
@@ -94,6 +99,8 @@ app.post("/auth", (req, res) => {
     });
 });
 
+
+
 // Render register form
 app.get("/register", (req, res) => {
     if (req.session.loggedin) {
@@ -102,6 +109,10 @@ app.get("/register", (req, res) => {
         res.render("login/register.hbs", { error: null });  // Renderizar el formulario de registro con mensaje de error nulo
     }
 });
+
+
+
+
 
 // Handle user registration
 app.post("/storeUser", (req, res) => {
@@ -326,10 +337,10 @@ app.get('/nuevoUsuario', (req, res) => {
 });
 
 
-
 // Ruta para guardar un nuevo empleado
 app.post('/guardarEmpleado', (req, res) => {
-    const { nombre, apellido,tipo, email,documento,sexo, telefono, direccion, fechaNacimiento, rol } = req.body;
+    const { nombre, apellido, tipo, email, documento, sexo, telefono, direccion, fechaNacimiento, rol } = req.body;
+    const connection = req.db;
 
     // Verificar si el email ya está registrado
     const sqlCheckEmail = 'SELECT COUNT(*) AS count FROM empleados WHERE email = ?';
@@ -415,8 +426,6 @@ app.post('/guardarEmpleado', (req, res) => {
         });
     });
 });
-
-
 
 
 
@@ -551,10 +560,15 @@ app.get("/menuempleados", (req, res) => {
 
 const moment = require('moment'); // Importa moment.js si no lo has hecho aún
 
+
+
+
+
 // Ruta para mostrar los datos del empleado y formulario para subir información adicional
 app.get('/subirinformacion', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
+        const connection = req.db;
 
         // Consulta para obtener los datos del empleado
         const sql = `SELECT id, nombre, apellido, tipo, documento, sexo, email, 
@@ -585,9 +599,11 @@ app.get('/subirinformacion', (req, res) => {
 });
 
 
+
 // Ruta para obtener la imagen del empleado por ID
 app.get('/imagen/:id', (req, res) => {
     const empleadoId = req.params.id;
+    const connection = req.db;
 
     const sql = 'SELECT foto FROM empleados WHERE id = ?';
     connection.query(sql, [empleadoId], (err, results) => {
@@ -612,19 +628,32 @@ app.get('/imagen/:id', (req, res) => {
 
 
 
-const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
 
-const storage = multer.memoryStorage();
 
-    const upload = multer({ storage: storage });
+
+// Configurar almacenamiento de multer para guardar archivos en el sistema de archivos
+// Configurar almacenamiento de multer para guardar archivos en el sistema de archivos
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'src/uploads'); // Carpeta donde se guardarán los archivos
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+
+
+
+
+});
+const upload = multer({ storage: storage });
 
 
     app.post('/update', upload.single('foto'), (req, res) => {
         const empleado = req.body;
         const foto = req.file; // Si no se sube ninguna foto, req.file será undefined
-    
+        const connection = req.db;
+
         let sql;
         let sqlParams;
     
@@ -690,6 +719,7 @@ const storage = multer.memoryStorage();
 // Ruta para obtener la imagen del empleado por ID
 app.get('/imagen/:id', (req, res) => {
     const empleadoId = req.params.id;
+        const connection = req.db;
 
     const sql = 'SELECT foto FROM empleados WHERE id = ?';
     connection.query(sql, [empleadoId], (err, results) => {
@@ -721,6 +751,7 @@ app.get('/imagen/:id', (req, res) => {
 app.get('/mihojadevida', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
+        const connection = req.db;
 
         // Consulta para obtener los datos del empleado
         const sql = `SELECT id, nombre, apellido, tipo, documento, sexo, email, 
@@ -758,71 +789,36 @@ app.get('/mihojadevida', (req, res) => {
 
 
 
-
-
-
+// Crear el directorio 'uploads' si no existe
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
 
 // Ruta para la página principal
 app.get("/subirdocumentos", (req, res) => {
     if (req.session.loggedin === true) {
-      const nombreUsuario = req.session.name;
-      console.log(`El usuario ${nombreUsuario} está autenticado.`);
-      req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
-  
-      const rolesString = req.session.roles;
-      const roles = Array.isArray(rolesString) ? rolesString : [];
-  
-      const jefe = roles.includes('jefe');
-      const empleado = roles.includes('empleado');
-  
-      res.render("EMPLEADOS/documentos/subirdocumentos.hbs", { name: req.session.name, jefe, empleado }); // Pasar los roles a la plantilla
-    } else {
-      res.redirect("/login");
-    }
-  });
-  
-
-
- 
-// Ruta para manejar la subida de documentos
-app.post("/subirdocumentos", upload.single('documentoPDF'), (req, res) => {
-    if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
+        console.log(`El usuario ${nombreUsuario} está autenticado.`);
+        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
 
-        // Verificar si se subió correctamente el archivo
-        if (!req.file) {
-            res.status(400).send('No se ha subido ningún archivo.');
-            return;
-        }
+        const rolesString = req.session.roles;
+        const roles = Array.isArray(rolesString) ? rolesString : [];
 
-        // Obtener el documento del empleado usando el correo electrónico (nombre de usuario)
-        const getDocumentoQuery = 'SELECT documento FROM empleados WHERE nombre = ?';
-        connection.query(getDocumentoQuery, [nombreUsuario], (err, results) => {
+        const jefe = roles.includes('jefe');
+        const empleado = roles.includes('empleado');
+
+        const connection = req.db;
+        const query = 'SELECT * FROM documentos WHERE usuario = ?';
+        connection.query(query, [nombreUsuario], (err, results) => {
             if (err) {
-                console.error('Error al obtener el documento del empleado:', err);
-                res.status(500).send('Error al obtener el documento del empleado.');
+                console.error('Error al consultar la base de datos:', err);
+                res.status(500).send('Error al cargar los documentos.');
                 return;
             }
 
-            if (results.length > 0) {
-                const documentoEmpleado = results[0].documento;
-                
-                // Obtener el contenido del archivo subido como un Buffer
-                const documentoSubido = req.file.buffer;
-
-                // Insertar el documento (archivo subido) en la tabla documentos
-                const insertDocumentQuery = 'INSERT INTO documentos (usuario, cedula) VALUES (?, ?)';
-                connection.query(insertDocumentQuery, [nombreUsuario, documentoSubido], (err, result) => {
-                    if (err) {
-                        console.error('Error al guardar el archivo en la base de datos:', err);
-                        res.status(500).send('Error al guardar el archivo.');
-                    } else {
-                        res.send('Archivo subido exitosamente.');
-                    }
-                });
-            } else {
-                res.status(404).send('Empleado no encontrado.');
-            }
+            const documentos = results.length ? results[0] : null;
+            res.render("EMPLEADOS/documentos/subirdocumentos.hbs", { name: req.session.name, jefe, empleado, documentos });
         });
     } else {
         res.redirect("/login");
@@ -832,10 +828,159 @@ app.post("/subirdocumentos", upload.single('documentoPDF'), (req, res) => {
 
 
 
+// Ruta para manejar la subida de documentos
+app.post("/subirdocumentos", upload.fields([
+    { name: 'documentoCedula' }, 
+    { name: 'documentoContratacion' }, 
+    { name: 'documentoTitulo' }, 
+    { name: 'documentoTituloBachiller' }, 
+    { name: 'documentoCertificaciones' }, 
+    { name: 'documentoRecomendaciones' }, 
+    { name: 'documentoAntecedentes' }, 
+    { name: 'documentoExamenMedico' }, 
+    { name: 'documentoFoto' }, 
+    { name: 'documentoComprobanteDomicilio' }, 
+    { name: 'documentoCesantias' },
+    { name: 'documentoHojaVida' },
+    { name: 'documentoEPS' },
+    { name: 'documentoLibretaMilitar' },
+    { name: 'documentoContraloria' }
+]), (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        const connection = req.db;
+
+        // Obtener las rutas de los archivos subidos, si existen
+        const documentoCedulaPath = req.files.documentoCedula ? req.files.documentoCedula[0].path : null;
+        const documentoContratacionPath = req.files.documentoContratacion ? req.files.documentoContratacion[0].path : null;
+        const documentoTituloPath = req.files.documentoTitulo ? req.files.documentoTitulo[0].path : null;
+        const documentoTituloBachillerPath = req.files.documentoTituloBachiller ? req.files.documentoTituloBachiller[0].path : null;
+        const documentoCertificacionesPath = req.files.documentoCertificaciones ? req.files.documentoCertificaciones[0].path : null;
+        const documentoRecomendacionesPath = req.files.documentoRecomendaciones ? req.files.documentoRecomendaciones[0].path : null;
+        const documentoAntecedentesPath = req.files.documentoAntecedentes ? req.files.documentoAntecedentes[0].path : null;
+        const documentoExamenMedicoPath = req.files.documentoExamenMedico ? req.files.documentoExamenMedico[0].path : null;
+        const documentoFotoPath = req.files.documentoFoto ? req.files.documentoFoto[0].path : null;
+        const documentoComprobanteDomicilioPath = req.files.documentoComprobanteDomicilio ? req.files.documentoComprobanteDomicilio[0].path : null;
+        const documentoCesantiasPath = req.files.documentoCesantias ? req.files.documentoCesantias[0].path : null;
+        const documentoHojaVidaPath = req.files.documentoHojaVida ? req.files.documentoHojaVida[0].path : null;
+        const documentoEPSPath = req.files.documentoEPS ? req.files.documentoEPS[0].path : null;
+        const documentoLibretaMilitarPath = req.files.documentoLibretaMilitar ? req.files.documentoLibretaMilitar[0].path : null;
+        const documentoContraloriaPath = req.files.documentoContraloria ? req.files.documentoContraloria[0].path : null;
+
+        // Consultar si ya existen documentos subidos para el usuario
+        const query = 'SELECT * FROM documentos WHERE usuario = ?';
+        connection.query(query, [nombreUsuario], (err, results) => {
+            if (err) {
+                console.error('Error al consultar la base de datos:', err);
+                res.status(500).send('Error al verificar los documentos existentes.');
+                return;
+            }
+
+            if (results.length > 0) {
+                // Actualizar documentos existentes
+                const updateDocumentQuery = `
+                    UPDATE documentos SET
+                    cedula_path = COALESCE(?, cedula_path),
+                    contratacion_path = COALESCE(?, contratacion_path),
+                    titulo_path = COALESCE(?, titulo_path),
+                    titulo_bachiller_path = COALESCE(?, titulo_bachiller_path),
+                    certificaciones_path = COALESCE(?, certificaciones_path),
+                    recomendaciones_path = COALESCE(?, recomendaciones_path),
+                    antecedentes_path = COALESCE(?, antecedentes_path),
+                    examen_medico_path = COALESCE(?, examen_medico_path),
+                    foto_path = COALESCE(?, foto_path),
+                    comprobante_domicilio_path = COALESCE(?, comprobante_domicilio_path),
+                    cesantias_path = COALESCE(?, cesantias_path),
+                    hoja_vida_path = COALESCE(?, hoja_vida_path),
+                    eps_path = COALESCE(?, eps_path),
+                    libreta_militar_path = COALESCE(?, libreta_militar_path),
+                    contraloria_path = COALESCE(?, contraloria_path)
+                    WHERE usuario = ?`;
+                connection.query(updateDocumentQuery, [
+                    documentoCedulaPath,
+                    documentoContratacionPath,
+                    documentoTituloPath,
+                    documentoTituloBachillerPath,
+                    documentoCertificacionesPath,
+                    documentoRecomendacionesPath,
+                    documentoAntecedentesPath,
+                    documentoExamenMedicoPath,
+                    documentoFotoPath,
+                    documentoComprobanteDomicilioPath,
+                    documentoCesantiasPath,
+                    documentoHojaVidaPath,
+                    documentoEPSPath,
+                    documentoLibretaMilitarPath,
+                    documentoContraloriaPath,
+                    nombreUsuario
+                ], (err, result) => {
+                    if (err) {
+                        console.error('Error al actualizar los archivos en la base de datos:', err);
+                        res.status(500).send('Error al actualizar los archivos.');
+                    } else {
+                        res.send('Archivos actualizados exitosamente.');
+                    }
+                });
+            } else {
+                // Insertar nuevos documentos
+                const insertDocumentQuery = 'INSERT INTO documentos (usuario, cedula_path, contratacion_path, titulo_path, titulo_bachiller_path, certificaciones_path, recomendaciones_path, antecedentes_path, examen_medico_path, foto_path, comprobante_domicilio_path, cesantias_path, hoja_vida_path, eps_path, libreta_militar_path, contraloria_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                connection.query(insertDocumentQuery, [
+                    nombreUsuario,
+                    documentoCedulaPath,
+                    documentoContratacionPath,
+                    documentoTituloPath,
+                    documentoTituloBachillerPath,
+                    documentoCertificacionesPath,
+                    documentoRecomendacionesPath,
+                    documentoAntecedentesPath,
+                    documentoExamenMedicoPath,
+                    documentoFotoPath,
+                    documentoComprobanteDomicilioPath,
+                    documentoCesantiasPath,
+                    documentoHojaVidaPath,
+                    documentoEPSPath,
+                    documentoLibretaMilitarPath,
+                    documentoContraloriaPath
+                ], (err, result) => {
+                    if (err) {
+                        console.error('Error al guardar los archivos en la base de datos:', err);
+                        res.status(500).send('Error al guardar los archivos.');
+                    } else {
+                        res.send('Archivos subidos exitosamente.');
+                    }
+                });
+            }
+        });
+    } else {
+        res.redirect("/login");
+    }
+});
 
 
+app.get('/verdocumentos', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        const connection = req.db;
 
+        // Obtener las rutas de los documentos del empleado
+        const getDocumentsQuery = 'SELECT cedula_path, contratacion_path FROM documentos WHERE usuario = ?';
+        connection.query(getDocumentsQuery, [nombreUsuario], (err, results) => {
+            if (err) {
+                console.error('Error al obtener los documentos del empleado:', err);
+                return res.status(500).send('Error al obtener los documentos.');
+            }
 
+            if (results.length === 0) {
+                return res.status(404).send('No se encontraron documentos para el usuario.');
+            }
+
+            const documentos = results[0];
+            res.render('verdocumentos', { documentos });
+        });
+    } else {
+        res.redirect("/login");
+    }
+});
 
 
 // Start server

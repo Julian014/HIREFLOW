@@ -4,13 +4,413 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir Documentos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #413d4b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 28px;
+            color: #90c9a7;
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Segoe UI Semibold', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="file"] {
+            display: none;
+        }
+        .form-group .file-label {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #90c9a7;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .form-group .file-label:hover {
+            background-color: #f0f4f8;
+            border-color: #79b890;
+        }
+        .form-group input[type="file"]:disabled + .file-label {
+            background-color: #e9e9e9;
+            cursor: not-allowed;
+        }
+        .disabled-message {
+            grid-column: span 2;
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            margin-top: -10px;
+        }
+        .drop-zone {
+            border: 2px dashed #90c9a7;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            color: #90c9a7;
+            transition: background-color 0.3s;
+            margin-top: 5px;
+        }
+        .drop-zone.dragover {
+            background-color: #f0f4f8;
+        }
+        .drop-zone p {
+            margin: 0;
+            font-size: 14px;
+        }
+        .file-name-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #413d4b;
+            display: none;
+        }
+        .file-name {
+            flex-grow: 1;
+        }
+        .remove-file {
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+        .remove-file:hover {
+            background: #c0392b;
+        }
+        button {
+            background-color: #90c9a7;
+            color: #fff;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #79b890;
+        }
+    </style>
 </head>
 <body>
-    <h1>Subir Documentos</h1>
-    <form action="/subirdocumentos" method="POST" enctype="multipart/form-data">
-        <label for="documentoPDF">Seleccionar documento PDF:</label>
-        <input type="file" name="documentoPDF" id="documentoPDF" accept="application/pdf" required>
-        <button type="submit">Subir Documento</button>
-    </form>
+    <div class="container">
+        <h1>Subir Documentos</h1>
+        <form id="uploadForm" action="/subirdocumentos" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <div>
+                    <label for="documentoCedula">Seleccionar cédula (PDF):</label>
+                    <input type="file" name="documentoCedula" id="documentoCedula" accept="application/pdf" {{#if documentos.cedula_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoCedula">Seleccionar cédula</label>
+                    <div class="drop-zone" data-for="documentoCedula">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoCedula">
+                        <span class="file-name" id="file-name-documentoCedula"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoCedula')">x</button>
+                    </div>
+                    {{#if documentos.cedula_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoContratacion">Seleccionar documentos de contratación (PDF):</label>
+                    <input type="file" name="documentoContratacion" id="documentoContratacion" accept="application/pdf" {{#if documentos.contratacion_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoContratacion">Seleccionar documentos de contratación</label>
+                    <div class="drop-zone" data-for="documentoContratacion">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoContratacion">
+                        <span class="file-name" id="file-name-documentoContratacion"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoContratacion')">x</button>
+                    </div>
+                    {{#if documentos.contratacion_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoTitulo">Seleccionar título profesional (PDF):</label>
+                    <input type="file" name="documentoTitulo" id="documentoTitulo" accept="application/pdf" {{#if documentos.titulo_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoTitulo">Seleccionar título profesional</label>
+                    <div class="drop-zone" data-for="documentoTitulo">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoTitulo">
+                        <span class="file-name" id="file-name-documentoTitulo"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoTitulo')">x</button>
+                    </div>
+                    {{#if documentos.titulo_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoTituloBachiller">Seleccionar título de bachiller (PDF):</label>
+                    <input type="file" name="documentoTituloBachiller" id="documentoTituloBachiller" accept="application/pdf" {{#if documentos.titulo_bachiller_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoTituloBachiller">Seleccionar título de bachiller</label>
+                    <div class="drop-zone" data-for="documentoTituloBachiller">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoTituloBachiller">
+                        <span class="file-name" id="file-name-documentoTituloBachiller"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoTituloBachiller')">x</button>
+                    </div>
+                    {{#if documentos.titulo_bachiller_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoCertificaciones">Seleccionar certificaciones (PDF):</label>
+                    <input type="file" name="documentoCertificaciones" id="documentoCertificaciones" accept="application/pdf" {{#if documentos.certificaciones_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoCertificaciones">Seleccionar certificaciones</label>
+                    <div class="drop-zone" data-for="documentoCertificaciones">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoCertificaciones">
+                        <span class="file-name" id="file-name-documentoCertificaciones"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoCertificaciones')">x</button>
+                    </div>
+                    {{#if documentos.certificaciones_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoRecomendaciones">Seleccionar cartas de recomendación (PDF):</label>
+                    <input type="file" name="documentoRecomendaciones" id="documentoRecomendaciones" accept="application/pdf" {{#if documentos.recomendaciones_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoRecomendaciones">Seleccionar cartas de recomendación</label>
+                    <div class="drop-zone" data-for="documentoRecomendaciones">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoRecomendaciones">
+                        <span class="file-name" id="file-name-documentoRecomendaciones"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoRecomendaciones')">x</button>
+                    </div>
+                    {{#if documentos.recomendaciones_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoAntecedentes">Seleccionar certificado de antecedentes de la Procuraduría (PDF):</label>
+                    <input type="file" name="documentoAntecedentes" id="documentoAntecedentes" accept="application/pdf" {{#if documentos.antecedentes_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoAntecedentes">Seleccionar certificado de antecedentes</label>
+                    <div class="drop-zone" data-for="documentoAntecedentes">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoAntecedentes">
+                        <span class="file-name" id="file-name-documentoAntecedentes"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoAntecedentes')">x</button>
+                    </div>
+                    {{#if documentos.antecedentes_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoExamenMedico">Seleccionar examen médico (PDF):</label>
+                    <input type="file" name="documentoExamenMedico" id="documentoExamenMedico" accept="application/pdf" {{#if documentos.examen_medico_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoExamenMedico">Seleccionar examen médico</label>
+                    <div class="drop-zone" data-for="documentoExamenMedico">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoExamenMedico">
+                        <span class="file-name" id="file-name-documentoExamenMedico"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoExamenMedico')">x</button>
+                    </div>
+                    {{#if documentos.examen_medico_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoFoto">Seleccionar fotografía reciente (PDF):</label>
+                    <input type="file" name="documentoFoto" id="documentoFoto" accept="application/pdf" {{#if documentos.foto_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoFoto">Seleccionar fotografía reciente</label>
+                    <div class="drop-zone" data-for="documentoFoto">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoFoto">
+                        <span class="file-name" id="file-name-documentoFoto"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoFoto')">x</button>
+                    </div>
+                    {{#if documentos.foto_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoComprobanteDomicilio">Seleccionar comprobante de domicilio (PDF):</label>
+                    <input type="file" name="documentoComprobanteDomicilio" id="documentoComprobanteDomicilio" accept="application/pdf" {{#if documentos.comprobante_domicilio_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoComprobanteDomicilio">Seleccionar comprobante de domicilio</label>
+                    <div class="drop-zone" data-for="documentoComprobanteDomicilio">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoComprobanteDomicilio">
+                        <span class="file-name" id="file-name-documentoComprobanteDomicilio"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoComprobanteDomicilio')">x</button>
+                    </div>
+                    {{#if documentos.comprobante_domicilio_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoCesantias">Seleccionar certificado de cesantías (PDF):</label>
+                    <input type="file" name="documentoCesantias" id="documentoCesantias" accept="application/pdf" {{#if documentos.cesantias_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoCesantias">Seleccionar certificado de cesantías</label>
+                    <div class="drop-zone" data-for="documentoCesantias">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoCesantias">
+                        <span class="file-name" id="file-name-documentoCesantias"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoCesantias')">x</button>
+                    </div>
+                    {{#if documentos.cesantias_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoHojaVida">Seleccionar hoja de vida (PDF):</label>
+                    <input type="file" name="documentoHojaVida" id="documentoHojaVida" accept="application/pdf" {{#if documentos.hoja_vida_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoHojaVida">Seleccionar hoja de vida</label>
+                    <div class="drop-zone" data-for="documentoHojaVida">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoHojaVida">
+                        <span class="file-name" id="file-name-documentoHojaVida"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoHojaVida')">x</button>
+                    </div>
+                    {{#if documentos.hoja_vida_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoEPS">Seleccionar certificado de afiliación a la EPS (PDF):</label>
+                    <input type="file" name="documentoEPS" id="documentoEPS" accept="application/pdf" {{#if documentos.eps_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoEPS">Seleccionar certificado de afiliación a la EPS</label>
+                    <div class="drop-zone" data-for="documentoEPS">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoEPS">
+                        <span class="file-name" id="file-name-documentoEPS"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoEPS')">x</button>
+                    </div>
+                    {{#if documentos.eps_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoLibretaMilitar">Seleccionar libreta militar si aplica (PDF):</label>
+                    <input type="file" name="documentoLibretaMilitar" id="documentoLibretaMilitar" accept="application/pdf" {{#if documentos.libreta_militar_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoLibretaMilitar">Seleccionar libreta militar</label>
+                    <div class="drop-zone" data-for="documentoLibretaMilitar">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoLibretaMilitar">
+                        <span class="file-name" id="file-name-documentoLibretaMilitar"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoLibretaMilitar')">x</button>
+                    </div>
+                    {{#if documentos.libreta_militar_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+                <div>
+                    <label for="documentoContraloria">Seleccionar certificado antecedentes de la Contraloría (PDF):</label>
+                    <input type="file" name="documentoContraloria" id="documentoContraloria" accept="application/pdf" {{#if documentos.contraloria_path}}disabled{{/if}} required>
+                    <label class="file-label" for="documentoContraloria">Seleccionar certificado de antecedentes de la Contraloría</label>
+                    <div class="drop-zone" data-for="documentoContraloria">
+                        <p>Arrastra y suelta el documento aquí</p>
+                    </div>
+                    <div class="file-name-container" id="file-name-container-documentoContraloria">
+                        <span class="file-name" id="file-name-documentoContraloria"></span>
+                        <button type="button" class="remove-file" onclick="removeFile('documentoContraloria')">x</button>
+                    </div>
+                    {{#if documentos.contraloria_path}}
+                        <div class="disabled-message">Documento ya subido</div>
+                    {{/if}}
+                </div>
+            </div>
+            <button type="submit">Subir Documentos</button>
+        </form>
+    </div>
+    <script>
+        function removeFile(inputId) {
+            const fileInput = document.getElementById(inputId);
+            const dropZone = document.querySelector(`.drop-zone[data-for="${inputId}"]`);
+            const fileNameContainer = document.getElementById(`file-name-container-${inputId}`);
+            
+            fileInput.value = '';
+            fileNameContainer.style.display = 'none';
+            dropZone.style.display = 'block';
+        }
+
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const inputId = zone.getAttribute('data-for');
+            const fileInput = document.getElementById(inputId);
+            const fileNameDisplay = document.getElementById('file-name-' + inputId);
+            const fileNameContainer = document.getElementById('file-name-container-' + inputId);
+
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                fileInput.files = files;
+
+                fileNameDisplay.textContent = files[0].name;
+                fileNameContainer.style.display = 'flex';
+                zone.style.display = 'none';
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    fileNameDisplay.textContent = fileInput.files[0].name;
+                    fileNameContainer.style.display = 'flex';
+                    zone.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
