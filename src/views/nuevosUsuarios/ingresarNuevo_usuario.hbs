@@ -1,146 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingreso de Nuevo Usuario</title>
     <style>
-    
-   /* Estilos generales */
+        /* Estilos generales */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
             margin: 0;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            left: 20%;
-            position: relative;
-            border: 2px solid black;
-            width: 50%;
+            max-width: 800px;
+            width: 100%;
             background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
         h2 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            font-size: 32px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
         form {
             display: grid;
-            grid-gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px 40px;
         }
         label {
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: #555;
         }
         input[type=text], input[type=email], input[type=date], select {
-            width: calc(100% - 20px);
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
         }
         input[type=text]:focus, input[type=email]:focus, input[type=date]:focus, select:focus {
-            border-color: #4CAF50;
+            border-color: #007BFF;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.1);
+            background-color: #e0f7fa;
+        }
+        input[type=date] {
+            position: relative;
+        }
+        input[type=date]::-webkit-inner-spin-button,
+        input[type=date]::-webkit-calendar-picker-indicator {
+            display: block;
+            position: absolute;
+            right: 10px;
+            color: #007BFF;
         }
         input[type=submit] {
-            background-color: #4CAF50;
+            grid-column: span 2;
+            background-color: #009688;
             color: white;
-            padding: 12px 0;
+            padding: 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            width: 100%;
+            font-size: 18px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         input[type=submit]:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
+            transform: translateY(-3px);
         }
         .back-link {
+            grid-column: span 2;
             display: block;
             text-align: center;
             margin-top: 20px;
             text-decoration: none;
-            color: #333;
+            color: #009688;
             font-size: 16px;
+            font-weight: 600;
+            transition: color 0.3s;
         }
+        .back-link:hover {
+            color: #0056b3;
+        }
+        .alert {
+            grid-column: span 2;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Estilo adicional para campos agrupados */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        /* Media Queries para Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+            form {
+                grid-template-columns: 1fr;
+                grid-gap: 20px;
+            }
+            input[type=submit] {
+                grid-column: span 1;
+            }
+            .back-link {
+                grid-column: span 1;
+            }
+        }   @media only screen and (max-width: 768px) {
+           
+           
+           
+           
+           
+            }
     </style>
 </head>
 <body>
-       <br>
-        <br>
-        <br>
-        <br>
-<div class="container">
-
-    <h2>Ingreso de Nuevo Usuario</h2>
-
-    {{#if error}}
-        <div class="alert alert-danger">{{error}}</div>
-    {{/if}}
+    <div class="container">
+        <h2>Ingreso de Nuevo Usuario</h2>
+        
+        {{#if error}}
+            <div class="alert alert-danger">{{error}}</div>
+        {{/if}}
 
         <form action="/guardarEmpleado" method="POST">
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" name="nombre" required>
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
 
-            <label for="apellido">Apellido:</label>
-            <input type="text" id="apellido" name="apellido" required>
+            <div class="form-group">
+                <label for="apellido">Apellido:</label>
+                <input type="text" id="apellido" name="apellido" required>
+            </div>
 
+            <div class="form-group">
+                <label for="tipo">Tipo de documento:</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="cedula_ciudadania">Cédula de ciudadanía</option>
+                    <option value="dni">DNI (Documento Nacional de Identidad)</option>
+                    <option value="pasaporte">Pasaporte</option>
+                    <option value="licencia">Licencia de conducir</option>
+                    <option value="nif">NIF (Número de Identificación Fiscal)</option>
+                    <option value="nie">NIE (Número de Identidad de Extranjero)</option>
+                    <option value="rut">RUT (Rol Único Tributario)</option>
+                    <option value="ci">Carné de identidad</option>
+                </select>
+            </div>
 
+            <div class="form-group">
+                <label for="documento">Documento:</label>
+                <input type="text" id="documento" name="documento" required>
+            </div>
 
-<label for="tipo">Tipo de documento:</label>
-<select id="tipo" name="tipo" required>
-        <option value="cedula_ciudadania">Cédula de ciudadanía</option>
+            <div class="form-group">
+                <label for="sexo">Sexo:</label>
+                <select id="sexo" name="sexo" required>
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                    <option value="no definido">No definido</option>
+                </select>
+            </div>
 
-    <option value="dni">DNI (Documento Nacional de Identidad)</option>
-    <option value="pasaporte">Pasaporte</option>
-    <option value="licencia">Licencia de conducir</option>
-    <option value="nif">NIF (Número de Identificación Fiscal)</option>
-    <option value="nie">NIE (Número de Identidad de Extranjero)</option>
-    <option value="rut">RUT (Rol Único Tributario)</option>
-    <option value="ci">Carné de identidad</option>
-</select>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
 
+            <div class="form-group">
+                <label for="telefono">Teléfono:</label>
+                <input type="text" id="telefono" name="telefono" required>
+            </div>
 
+            <div class="form-group">
+                <label for="direccion">Dirección:</label>
+                <input type="text" id="direccion" name="direccion">
+            </div>
 
-  <label for="documento">documento:</label>
-            <input type="text" id="documento" name="documento" required>
+            <div class="form-group">
+                <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+            </div>
 
-
-<label for="sexo">sexo</label>
-<select id="sexo" name="sexo" required>
-    <option value="masculino">masculino</option>
-    <option value="femenino">femenino</option>
-    <option value="no definido">no definido</option>
-</select>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="telefono">Teléfono:</label  >
-            <input type="text" id="telefono" name="telefono"  required>
-
-            <label for="direccion">Dirección:</label>
-            <input type="text" id="direccion" name="direccion">
-
-            <label for="fechaNacimiento">Fecha de Nacimiento:</label required>
-            <input type="date" id="fechaNacimiento" name="fechaNacimiento"  required>
-
-     
-
-    <label for="rol">CARGO:</label>
-            <input type="text" id="rol" name="rol" required>
-
+            <div class="form-group">
+                <label for="rol">Cargo:</label>
+                <input type="text" id="rol" name="rol" required>
+            </div>
 
             <input type="submit" value="Guardar">
         </form>
 
-        <a href="/menuempresa" class="back-link">Volver al menu</a>
+        <a href="/menuempresa" class="back-link">Volver al menú</a>
     </div>
 </body>
 </html>

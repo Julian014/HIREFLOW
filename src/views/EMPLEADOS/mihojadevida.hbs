@@ -2,197 +2,188 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Resume</title>
+    <title>Employee Profile</title>
     <style>
-      #container{
-        width:60%;
-        margin:0 auto;
-        /* background-color:pink; */
-        display: flex;
-        
-      }  
-       #imges{
-        display:flex;
-        justify-content: center;
-        align-items: center;
-      } 
-      #imges img{
-        border-radius:50%;
-      }
-    #skill{
-        margin-bottom:100px;
-      } -->
-      #left-sec{
-        font-size: 20px;
-        color: black;
-        width:40%;
-        background-color: white;
-        padding: 20px;
-        border:1px solid blue;
-      
-      }
-      #right-sec{
-        width:60%;
-        background-color:#DCDCDC;
-        padding: 20px;
-        border:1px solid blue;
-      }
-      #container div{
-    margin-bottom: 30px; 
-      }
-      table,tr,td,th{
-        border:1px solid black;
-        border-collapse:collapse;
-
-      }
-     h1, h2 {
-            text-align: center;
-            color: #413d4b;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
         }
-        
-#fotoEmpleado{
-
-width: 50%;
-
-}
+        #container {
+            width: 90%;
+            margin: 30px auto;
+            display: flex;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        #left-sec, #right-sec {
+            padding: 20px;
+        }
+        #left-sec {
+            width: 35%;
+            background-color: #f9f9f9;
+            border-right: 1px solid #e0e0e0;
+        }
+        #right-sec {
+            width: 65%;
+        }
+        #imges {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #imges img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 4px solid #90c9a7;
+        }
+        h1, h2 {
+            color: #413d4b;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 20px;
+        }
+        p, li {
+            color: #333;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+        strong {
+            color: #000;
+        }
+        #skill, #left-sec div, #right-sec div {
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #90c9a7;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
-  
     <div id="container">
         <div id="left-sec">
             <div id="imges">
-            <img id="fotoEmpleado" src="/imagen/{{empleado.id}}" alt="Foto del Conductor">
-
+                <img id="fotoEmpleado" src="/imagen/{{empleado.id}}" alt="Foto del Conductor">
             </div>
-                <div>
-                <h2> INFORMACION PERSONAL</h2>
-                    <p><strong>Nombres:</strong> {{empleado.nombre}}</p>
-                    <p><strong>Apellidos:</strong> {{empleado.apellido}} </p>
-                     <p><strong>Tipo de Documento: </strong>{{empleado.tipo}}  </p>
-                    <p><strong>N° de Documento:</strong>{{empleado.documento}}</p>
-                    <p><strong>Fecha de Nacimiento:</strong> {{empleado.fechaNacimiento}}</p>
-
-                    <p><strong>Sexo:</strong>   {{empleado.sexo}}</p>
-
-
-
-
-
-
+            <div>
+                <h2>Información Personal</h2>
+                <p><strong>Nombres:</strong> {{empleado.nombre}}</p>
+                <p><strong>Apellidos:</strong> {{empleado.apellido}}</p>
+                <p><strong>Tipo de Documento:</strong> {{empleado.tipo}}</p>
+                <p><strong>N° de Documento:</strong> {{empleado.documento}}</p>
+                <p><strong>Fecha de Nacimiento:</strong> {{empleado.fechaNacimiento}}</p>
+                <p><strong>Sexo:</strong> {{empleado.sexo}}</p>
             </div>
             <div>
                 <h2>Contacto</h2>
-                    <p><strong>Dirección:</strong> {{empleado.direccion}} </p>
-                    <p><strong>Email:</strong>  {{empleado.email}}</p>
-                    <p><strong>Celular:</strong> {{empleado.telefono}}" </p>
+                <p><strong>Dirección:</strong> {{empleado.direccion}}</p>
+                <p><strong>Email:</strong> {{empleado.email}}</p>
+                <p><strong>Celular:</strong> {{empleado.telefono}}</p>
             </div>
             <div id="skill">
-                <h2>CURSOS</h2>
+                <h2>Cursos</h2>
                 <ul>
-                    <li></li>
-                    <li></li>
-                    <li></li>
+                    <li>{{empleado.curso1}}</li>
+                    <li>{{empleado.curso2}}</li>
+                    <li>{{empleado.curso3}}</li>
                 </ul>
             </div>
             <div>
-                <h2>Estado civil</h2>
-                <ul>
-                    <li> <p>{{empleado.estado_civil}}</p></li>
-                </ul>
+                <h2>Estado Civil</h2>
+                <p>{{empleado.estado_civil}}</p>
             </div>
         </div>
-              <div id="right-sec">
+        <div id="right-sec">
             <div>
-            <h1>{{empleado.nombre}} {{empleado.apellido}}   </h1>
-            <p>{{empleado.rol}}</p>
-        </div>
-        <div>
-            <h2>perfil de cargo</h2>
-            <p>
-{{empleado.perfil}}
-            </p>
-        </div>
-        <div>
-            <h2>Experiencia</h2>
-            <h4>{{empleado.tituloexpecia1}}</h4>
-            <p>{{empleado.descripcionexpecia1}}</p>
-            <ul>
-                <li>{{empleado.funciones1}}</li>
-                <li>{{empleado.funciones2}}</li>
-            </ul>
-          <h4>{{empleado.tituloexpecia2}}</h4>
-            <p>{{empleado.descripcionexpecia2}}</p>
-            <ul>
-               <li>{{empleado.funciones3}}</li>
-                <li>{{empleado.funciones4}}</li>
-            </ul>
-        </div>
-        <div>
-            <h2>Educacion</h2>
-            <table><tr>
-              <th>University/College</th>  
-              <th>Passing year</th>
-              <th>
-                Percentage/Cgpa
-              </th>
-            </tr>
-            <tr>
-               <td>xyz</td> 
-               <td>2020</td>
-               <td>8.9</td>
-            </tr>
-            <tr>
-               <td>pqr</td> 
-               <td>2018</td>
-               <td>89%</td>
-            </tr>
-            </table>
-        </div>
-        <div>
-            
-                <h2>Contacto en caso de emergencia</h2>
+                <h1>{{empleado.nombre}} {{empleado.apellido}}</h1>
+                <p>{{empleado.rol}}</p>
+            </div>
+            <div>
+                <h2>Perfil de Cargo</h2>
+                <p>{{empleado.perfil}}</p>
+            </div>
+            <div>
+                <h2>Experiencia</h2>
+                <h4>{{empleado.tituloexpecia1}}</h4>
+                <p>{{empleado.descripcionexpecia1}}</p>
                 <ul>
-                    <li>  NOMBRE :<p>{{empleado.emergencia_nombre}}</p></li>
-                     <li> CELULAR:<p>{{empleado.emergencia_telefono}}</p></li>
+                    <li>{{empleado.funciones1}}</li>
+                    <li>{{empleado.funciones2}}</li>
+                </ul>
+                <h4>{{empleado.tituloexpecia2}}</h4>
+                <p>{{empleado.descripcionexpecia2}}</p>
+                <ul>
+                    <li>{{empleado.funciones3}}</li>
+                    <li>{{empleado.funciones4}}</li>
                 </ul>
             </div>
-        </div>
-        </div>
+            <div>
+                <h2>Educación</h2>
+                <table>
+                    <tr>
+                        <th>Universidad/Colegio</th>
+                        <th>Año de Graduación</th>
+                        <th>Porcentaje/CGPA</th>
+                    </tr>
+                    <tr>
+                        <td>XYZ</td>
+                        <td>2020</td>
+                        <td>8.9</td>
+                    </tr>
+                    <tr>
+                        <td>PQR</td>
+                        <td>2018</td>
+                        <td>89%</td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <h2>Contacto en Caso de Emergencia</h2>
+                <ul>
+                    <li><strong>Nombre:</strong> {{empleado.emergencia_nombre}}</li>
+                    <li><strong>Celular:</strong> {{empleado.emergencia_telefono}}</li>
+                </ul>
+            </div>
         </div>
     </div>
-      <script>
-        function enableEditing() {
-            var infoItems = document.querySelectorAll('.info-item input');
-            infoItems.forEach(function(input) {
-                input.removeAttribute('disabled');
-                input.style.borderBottom = '1px solid #ccc';
-            });
-            document.getElementById('saveBtn').style.display = 'block';
-        }
-
-        // Cargar la imagen del empleado dinámicamente (mantenido como antes)
+    <script>
         window.onload = function() {
             var empleadoId = "{{empleado.id}}";
             var img = document.getElementById('fotoEmpleado');
             img.src = `/imagen/${empleadoId}`;
         };
-
-        // Validar el formulario antes de enviarlo
-        document.getElementById('updateForm').addEventListener('submit', function(event) {
-            var inputFile = document.querySelector('input[type="file"]');
-            var file = inputFile.files[0];
-
-            if (!file) {
-                // No se ha seleccionado ninguna imagen nueva, deshabilitar el campo para que no se envíe
-                inputFile.disabled = true;
-            }
-        });
     </script>
 </body>
 </html>

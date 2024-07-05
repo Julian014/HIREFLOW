@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Empleado</title>
     <style>
-        /* Estilo para el cuerpo del documento */
+        /* Estilos generales */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f4f4f4;
             color: #333;
             margin: 0;
-            padding: 0;
         }
         
-        /* Estilo para el contenedor principal */
         .container {
             max-width: 800px;
             margin: 50px auto;
@@ -23,10 +22,9 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         
-        /* Estilo para los encabezados */
         h1, h2 {
             text-align: center;
-            color: #413d4b;
+            color: #132e3e; /* Color principal para los títulos */
             margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
             font-weight: bold;
@@ -41,17 +39,14 @@
             border-radius: 5px;
         }
         
-        /* Estilo para los campos de información */
         .info-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
         
         .info-item {
-            width: 48%;
-            margin-bottom: 20px;
-            padding: 10px;
+            padding: 20px;
             background-color: #f9f9f9;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -59,25 +54,30 @@
         }
         
         .info-item p {
-            margin: 5px 0;
+            margin: 10px 0;
             font-size: 16px;
         }
         
         .info-item input {
             width: calc(100% - 10px);
             font-size: 16px;
-            padding: 5px;
-            border: none;
-            background: none;
-            color: #333;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
         
         .info-item strong {
             font-size: 18px;
-            color: #333;
+            color: #132e3e; /* Color principal para los textos fuertes */
         }
         
-        /* Estilo para los botones */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
         .btn {
             background-color: #90c9a7;
             color: #fff;
@@ -87,9 +87,6 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: block;
-            width: 100%;
-            margin-top: 10px;
             font-size: 16px;
             font-weight: bold;
             text-align: center;
@@ -99,81 +96,78 @@
             background-color: #4cae4c;
         }
         
-        /* Estilo para la imagen del conductor */
         .conductor-image {
-            margin-bottom: 20px;
             text-align: center;
+            margin-bottom: 20px;
         }
         
         .conductor-image img {
             width: 100%;
-            max-width: 360px;
-            border: 5px solid #ccc;
+            max-width: 300px;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Media Queries para Responsividad */
+        @media (max-width: 600px) {
+            .info-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
-   <script>
+    <script>
         function enableEditing() {
             var infoItems = document.querySelectorAll('.info-item input');
             infoItems.forEach(function(input) {
                 input.removeAttribute('disabled');
-                input.style.borderBottom = '1px solid #ccc';
+                input.style.border = '1px solid #90c9a7'; /* Cambio de estilo al habilitar edición */
             });
             document.getElementById('saveBtn').style.display = 'block';
-            document.getElementById('fotoInput').style.display = 'block'; // Mostrar campo de subir foto
-        }
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h2>Información Personal</h2>
-        <div class="conductor-image">
-            <img id="fotoEmpleado" src="/imagen/{{empleado.id}}" alt="Foto del empleado">
-        </div>
-<form action="/update" method="post" enctype="multipart/form-data">
-            <div class="info-container">
-                <div class="info-item">
-                    <p><strong>Nombres:</strong>{{empleado.nombre}}</p>
-                    <p><strong>Apellidos:</strong>{{empleado.apellido}}</p>
-                    <p><strong>Tipo de Documento:</strong>{{empleado.tipo}} </p>
-                    <p><strong>N° de Documento:</strong> {{empleado.documento}} </p>
-                    <p><strong>Sexo:</strong> {{empleado.sexo}}</p>
-                    <p><strong>Email:</strong> {{empleado.email}}</p>
-                    <p><strong>Celular:</strong> {{empleado.telefono}}</p>
-                    <p><strong>Dirección:</strong><input type="text" name="direccion" value="{{empleado.direccion}}" disabled></p>
-<p><strong>Fecha de Nacimiento:</strong> {{empleado.fechaNacimiento}}</p>
-                    <p><strong>CARGO:</strong> {{empleado.rol}} </p>
-                    <p><strong>Tipo de Sangre:</strong> <input type="text" name="tipo_sangre" value="{{empleado.tipo_sangre}}" disabled></p>
-                    <p><strong>Estado Civil:</strong> <input type="text" name="estado_civil" value="{{empleado.estado_civil}}" disabled></p>
-                    <p><strong>Contacto en Caso de Emergencia:</strong> <input type="text" name="emergencia_nombre" value="{{empleado.emergencia_nombre}}" disabled></p>
-                    <p><strong>Teléfono en Caso de Emergencia:</strong> <input type="text" name="emergencia_telefono" value="{{empleado.emergencia_telefono}}" disabled></p>
-    
-    <p><strong>Subir Foto:</strong> <input type="file" name="foto" accept="image/*" disabled></p>
-    <input type="hidden" name="id" value="{{empleado.id}}">
-                </div>
-            </div>
-            <button type="button" class="btn" onclick="enableEditing()">subir informacion</button>
-            <button type="submit" class="btn" id="saveBtn" style="display: none;">Guardar Cambios</button>
-        </form>
-        
-    </div>
-     <script>
-        function enableEditing() {
-            var infoItems = document.querySelectorAll('.info-item input');
-            infoItems.forEach(function(input) {
-                input.removeAttribute('disabled');
-                input.style.borderBottom = '1px solid #ccc';
-            });
-            document.getElementById('saveBtn').style.display = 'block';
-            document.getElementById('fotoInput').style.display = 'block'; // Mostrar campo de subir foto
+            document.getElementById('updateBtn').style.display = 'none';
+            document.querySelector('[name="foto"]').removeAttribute('disabled');
         }
 
-        // Cargar la imagen del empleado dinámicamente
         window.onload = function() {
-            var empleadoId = "{{empleado.id}}"; // Ajusta cómo obtienes el ID del empleado en tu contexto
+            var empleadoId = "{{empleado.id}}";
             var img = document.getElementById('fotoEmpleado');
             img.src = `/imagen/${empleadoId}`;
         };
     </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Perfil del Empleado</h1>
+        <form action="/update" method="post" enctype="multipart/form-data">
+            <div class="info-container">
+                <div class="info-item">
+                    <div class="conductor-image">
+                        <img id="fotoEmpleado" src="/imagen/{{empleado.id}}" alt="Foto del empleado">
+                    </div>
+                    <p><strong>Nombres:</strong> {{empleado.nombre}}</p>
+                    <p><strong>Apellidos:</strong> {{empleado.apellido}}</p>
+                    <p><strong>Tipo de Documento:</strong> {{empleado.tipo}}</p>
+                    <p><strong>N° de Documento:</strong> {{empleado.documento}}</p>
+                    <p><strong>Sexo:</strong> {{empleado.sexo}}</p>
+                    <p><strong>Email:</strong> {{empleado.email}}</p>
+                    <p><strong>Celular:</strong> {{empleado.telefono}}</p>
+                </div>
+                <div class="info-item">
+                    <p><strong>Dirección:</strong> <input type="text" name="direccion" value="{{empleado.direccion}}" disabled></p>
+                    <p><strong>Fecha de Nacimiento:</strong> {{empleado.fechaNacimiento}}</p>
+                    <p><strong>Cargo:</strong> {{empleado.rol}}</p>
+                    <p><strong>Tipo de Sangre:</strong> <input type="text" name="tipo_sangre" value="{{empleado.tipo_sangre}}" disabled></p>
+                    <p><strong>Estado Civil:</strong> <input type="text" name="estado_civil" value="{{empleado.estado_civil}}" disabled></p>
+                    <p><strong>Contacto en Caso de Emergencia:</strong> <input type="text" name="emergencia_nombre" value="{{empleado.emergencia_nombre}}" disabled></p>
+                    <p><strong>Teléfono en Caso de Emergencia:</strong> <input type="text" name="emergencia_telefono" value="{{empleado.emergencia_telefono}}" disabled></p>
+                    <p><strong>Subir Foto:</strong> <input type="file" name="foto" accept="image/*" disabled></p>
+                    <input type="hidden" name="id" value="{{empleado.id}}">
+                </div>
+            </div>
+            <div class="btn-container">
+                <button type="button" class="btn" id="updateBtn" onclick="enableEditing()">ACTUALIZAR INFORMACION</button>
+                <button type="submit" class="btn" id="saveBtn" style="display: none;">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

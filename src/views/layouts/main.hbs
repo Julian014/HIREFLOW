@@ -3,12 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS</title>
-    
-    <link href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" rel="stylesheet">
- 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      padding-top: 160px; /* Espacio para el nav */
+    }
 
- 
-   {{{body}}}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #nav-bar {
+      position: fixed;
+      width: 80%;
+      background: linear-gradient(to right, #132e3e, #132e3e);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      top: 0;
+      z-index: 1000;
+      border-radius: 0 0 15px 15px;
+      transition: background 0.3s;
+      left: 10%;
+    }
+
+    #nav-bar:hover {
+      background: linear-gradient(to right, #666567, #666567);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    #nav-bar .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    #nav-bar .logo img {
+      height: 80px;
+      margin-right: 10px;
+    }
+
+    #nav-bar .logo span {
+      color: white;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+
+    #nav-bar .menu {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+
+    #nav-bar .menu li {
+      margin-left: 20px;
+      position: relative;
+    }
+
+    #nav-bar .menu li a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 25px;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background: linear-gradient(to right, #009688 , #009688 );
+    }
+
+    #nav-bar .menu li a:hover {
+      background: #d9d9d9;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #nav-bar .menu li a .icon {
+      margin-right: 8px;
+      font-size: 1.2em;
+    }
+
+    #nav-bar .menu li a::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background-color: white;
+      visibility: hidden;
+      transform: scaleX(0);
+      transition: all 0.3s ease-in-out;
+    }
+
+    #nav-bar .menu li a:hover::before {
+      visibility: visible;
+      transform: scaleX(1);
+    }
+
+    #nav-bar .menu li.dropdown {
+      position: relative;
+    }
+
+    #nav-bar .menu li.dropdown .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #1a252f;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      padding: 12px 16px;
+      border-radius: 15px;
+      top: 60px;
+      left: 0;
+      z-index: 1000;
+      min-width: 200px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #nav-bar .menu li.dropdown:hover .dropdown-content {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #nav-bar .menu li.dropdown .dropdown-content a {
+      color: white;
+      padding: 8px 12px;
+      text-decoration: none;
+      display: block;
+      border-radius: 10px;
+      transition: background 0.3s, transform 0.3s;
+      background: linear-gradient(to right, #1a252f, #2c3e50);
+    }
+
+    #nav-bar .menu li.dropdown .dropdown-content a:hover {
+      background: #d9d9d9;
+      transform: scale(1.05);
+    }
+
+    #nav-bar .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    #nav-bar .hamburger div {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 4px;
+      transition: all 0.3s ease;
+    }
+
+    #nav-bar .menu.active {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to right, #1a252f, #2c3e50);
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px 0;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #nav-bar .menu.active.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #nav-bar .menu li {
+      margin: 15px 0;
+    }
+
+    @media (max-width: 768px) {
+      #nav-bar .hamburger {
+        display: flex;
+      }
+
+      #nav-bar .menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+      }
+
+      #nav-bar .menu.active {
+        display: flex;
+      }
+
+      #nav-bar .menu li {
+        margin: 10px 0;
+        width: 100%;
+      }
+
+      #nav-bar .menu li a {
+        width: 100%;
+        text-align: center;
+      }
+
+      #nav-bar .menu li.dropdown .dropdown-content {
+        left: auto;
+        right: 0;
+      }
+    }
+    </style>
+</head>
+<body>
+  <nav id="nav-bar">
+    <div class="logo">
+      <img src="imagenes/logovianco-removebg-preview.png" alt="Logo de Vianco">
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <ul class="menu">
+      <li><a href="/"><span class="icon"><i class="fas fa-home"></i></span> Menu Principal</a></li>
+      <li class="dropdown">
+        <a href="javascript:void(0)"><span class="icon"><i class="fas fa-bell"></i></span> Notificaciones</a>
+        <div class="dropdown-content">
+          <a href="notificaciones.html">Ver todas</a>
+          <a href="ajustes_notificaciones.html">Ajustes</a>
+        </div>
+      </li>
+      <li><a href="/logout"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> Cerrar Sesión</a></li>
+    </ul>
+  </nav>
+  {{{body}}}
+  <script>
+    function toggleMenu() {
+      const menu = document.querySelector('#nav-bar .menu');
+      menu.classList.toggle('show');
+    }
+  </script>
 </body>
 </html>

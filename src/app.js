@@ -1,22 +1,28 @@
 const express = require("express");
 const session = require("express-session");
-const mysql = require("mysql2");
+const mysql = require('mysql2/promise');
 const { engine } = require("express-handlebars");
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const app = express();
 app.set("port", process.env.PORT || 3000);
-
 // Configure view engine
 app.set("views", __dirname + "/views");
 app.engine(".hbs", engine({ extname: ".hbs" }));  // Configura Handlebars como motor de vistas
 app.set("view engine", "hbs");
 
-
+const Handlebars = require('handlebars');
+// Registrar el helper 'not'
+Handlebars.registerHelper('not', function (value) {
+    return !value;
+});
 app.use(express.json());  // Middleware para parsear JSON en las solicitudes
 app.use(express.urlencoded({ extended: true }));  // Middleware para parsear URL-encoded en las solicitudes
 app.use(express.static(__dirname + '/public'));  // Middleware para servir archivos estáticos desde el directorio 'public'
+
+
+
 
 // Crea un pool de conexiones
 const pool = mysql.createPool({
@@ -45,20 +51,17 @@ app.use(session({
 
 
 // Middleware para pasar una conexión del pool a cada objeto de solicitud
-app.use((req, res, next) => {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            return next(err);
-        }
-        req.db = connection;
+app.use(async (req, res, next) => {
+    try {
+        req.db = await pool.getConnection();
         res.on('finish', () => {
             req.db.release();
         });
         next();
-    });
+    } catch (err) {
+        next(err);
+    }
 });
-
-
 
 // Render login form
 app.get("/login", (req, res) => {
@@ -74,16 +77,12 @@ app.get("/login", (req, res) => {
 
 
 // Handle login authentication
-app.post("/auth", (req, res) => {
+app.post("/auth", async (req, res) => {
     const data = req.body;
     const connection = req.db;
 
-    connection.query("SELECT * FROM user WHERE email = ? AND password = ?", [data.email, data.password], (err, userData) => {
-        if (err) {
-            console.error("Error fetching user from database:", err);  // Manejar errores al recuperar datos del usuario desde la base de datos
-            res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
-            return;
-        }
+    try {
+        const [userData] = await connection.query("SELECT * FROM user WHERE email = ? AND password = ?", [data.email, data.password]);
 
         if (userData.length > 0) {
             const user = userData[0];
@@ -96,9 +95,11 @@ app.post("/auth", (req, res) => {
             // Renderizar página de inicio de sesión con mensaje de error
             res.render("login/index.hbs", { error: "Usuario no encontrado o contraseña incorrecta" });
         }
-    });
+    } catch (err) {
+        console.error("Error fetching user from database:", err);  // Manejar errores al recuperar datos del usuario desde la base de datos
+        res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
+    }
 });
-
 
 
 // Render register form
@@ -113,35 +114,31 @@ app.get("/register", (req, res) => {
 
 
 
-
 // Handle user registration
-app.post("/storeUser", (req, res) => {
+app.post("/storeUser", async (req, res) => {
     const data = req.body;
     const connection = req.db;
 
-    connection.query("SELECT * FROM user WHERE email = ?", [data.email], (err, userData) => {
-        if (err) {
-            console.error("Error fetching user from database:", err);  // Manejar errores al recuperar datos del usuario desde la base de datos
-            res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
-            return;
-        }
+    try {
+        const [userData] = await connection.query("SELECT * FROM user WHERE email = ?", [data.email]);
 
         if (userData.length > 0) {
             res.render("login/register.hbs", { error: "User with this email already exists" });  // Renderizar página de registro con mensaje de usuario ya existente
             return;
         }
 
-        connection.query("INSERT INTO user SET ?", data, (err, rows) => {
-            if (err) {
-                console.error("Error inserting user into database:", err);  // Manejar errores al insertar usuario en la base de datos
-                res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
-            } else {
-                console.log("User registered successfully");  // Registrar registro exitoso del usuario
-                res.redirect("/");  // Redirigir a la página principal después del registro exitoso
-            }
-        });
-    });
+        await connection.query("INSERT INTO user SET ?", data);
+        console.log("User registered successfully");  // Registrar registro exitoso del usuario
+        res.redirect("/");  // Redirigir a la página principal después del registro exitoso
+    } catch (err) {
+        console.error("Error handling user registration:", err);  // Manejar errores durante el registro del usuario
+        res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
+    }
 });
+
+
+
+
 
 // Handle logout
 app.get("/logout", (req, res) => {
@@ -182,7 +179,7 @@ const transporter = nodemailer.createTransport({
 const crypto = require('crypto'); // Importa el módulo crypto
 
 // Handle forgot password
-app.post("/forgot-password", (req, res) => {
+app.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
     const connection = req.db;
 
@@ -191,12 +188,11 @@ app.post("/forgot-password", (req, res) => {
     const resetTokenExpiration = new Date();
     resetTokenExpiration.setHours(resetTokenExpiration.getHours() + 1); // Token válido por 1 hora
 
-    connection.query("UPDATE user SET resetToken = ?, resetTokenExpiration = ? WHERE email = ?", [resetToken, resetTokenExpiration, email], (err, result) => {
-        if (err) {
-            console.error("Error updating reset token in database:", err);
-            res.status(500).send("Internal Server Error");
-            return;
-        }
+    try {
+        const [result] = await connection.query(
+            "UPDATE user SET resetToken = ?, resetTokenExpiration = ? WHERE email = ?",
+            [resetToken, resetTokenExpiration, email]
+        );
 
         // Check if user with provided email exists
         if (result.affectedRows === 0) {
@@ -225,72 +221,79 @@ app.post("/forgot-password", (req, res) => {
                 }
             });
         }
-    });
+    } catch (err) {
+        console.error("Error updating reset token in database:", err);
+        res.status(500).send("Internal Server Error");
+    }
 });
+
+
 
 // Página para restablecer la contraseña (GET)
-app.get("/reset-password", (req, res) => {
+app.get("/reset-password", async (req, res) => {
     const token = req.query.token; // Obtiene el token de la consulta
     console.log("Token recibido en GET:", token);
-  
-    // Verificar si el token es válido y está dentro del tiempo de expiración adecuado
-    connection.query(
-      "SELECT * FROM user WHERE resetToken = ? AND resetTokenExpiration > NOW()",
-      [token],
-      (err, results) => {
-        if (err) {
-          console.error("Error al verificar el token:", err);
-          res.status(500).send("Error interno al verificar el token");
-        } else {
-          if (results.length === 0) {
+
+    try {
+        const connection = req.db;
+
+        // Verificar si el token es válido y está dentro del tiempo de expiración adecuado
+        const [results] = await connection.query(
+            "SELECT * FROM user WHERE resetToken = ? AND resetTokenExpiration > NOW()",
+            [token]
+        );
+
+        if (results.length === 0) {
             res.status(400).send("El token para restablecer la contraseña es inválido o ha expirado");
-          } else {
+        } else {
             // Mostrar el formulario para restablecer la contraseña
             res.render("login/reset-password.hbs", { token });
-          }
         }
-      }
-    );
+    } catch (err) {
+        console.error("Error al verificar el token:", err);
+        res.status(500).send("Error interno al verificar el token");
+    }
 });
 
+
+
+
+
+
+
 // Procesar restablecimiento de contraseña (POST)
-app.post("/reset-password", (req, res) => {
+app.post("/reset-password", async (req, res) => {
     const { token, password } = req.body;
 
-    // Verificar si el token es válido y está dentro del tiempo de expiración adecuado
-    connection.query(
-      "SELECT * FROM user WHERE resetToken = ? AND resetTokenExpiration > NOW()",
-      [token],
-      (err, results) => {
-        if (err) {
-          console.error("Error al verificar el token:", err);
-          res.status(500).send("Error interno al verificar el token");
-        } else {
-          if (results.length === 0) {
+    try {
+        const connection = req.db;
+
+        // Verificar si el token es válido y está dentro del tiempo de expiración adecuado
+        const [results] = await connection.query(
+            "SELECT * FROM user WHERE resetToken = ? AND resetTokenExpiration > NOW()",
+            [token]
+        );
+
+        if (results.length === 0) {
             res.status(400).send("El token para restablecer la contraseña es inválido o ha expirado");
-          } else {
+        } else {
             const user = results[0];
 
             // Actualizar la contraseña en la base de datos y limpiar el token
-            connection.query(
-              "UPDATE user SET password = ?, resetToken = NULL, resetTokenExpiration = NULL WHERE id = ?",
-              [password, user.id],
-              (updateErr, updateResult) => {
-                if (updateErr) {
-                  console.error("Error al actualizar la contraseña:", updateErr);
-                  res.status(500).send("Error interno al actualizar la contraseña");
-                } else {
-                  console.log("Contraseña actualizada exitosamente para el usuario:", user.email);
-
-                  // Redirigir al usuario a la página de inicio de sesión con un mensaje de éxito
-                  res.render("login/index.hbs", { successMessage: "Contraseña restablecida exitosamente" });
-                }
-              }
+            await connection.query(
+                "UPDATE user SET password = ?, resetToken = NULL, resetTokenExpiration = NULL WHERE id = ?",
+                [password, user.id]
             );
-          }
+
+            console.log("Contraseña actualizada exitosamente para el usuario:", user.email);
+
+            // Redirigir al usuario a la página de inicio de sesión con un mensaje de éxito
+            res.render("login/index.hbs", { successMessage: "Contraseña restablecida exitosamente" });
         }
-      }
-    );
+    } catch (err) {
+        console.error("Error al procesar el restablecimiento de la contraseña:", err);
+        res.status(500).send("Error interno al procesar el restablecimiento de la contraseña");
+    }
 });
 
 
@@ -336,19 +339,15 @@ app.get('/nuevoUsuario', (req, res) => {
     }
 });
 
-
 // Ruta para guardar un nuevo empleado
-app.post('/guardarEmpleado', (req, res) => {
+app.post('/guardarEmpleado', async (req, res) => {
     const { nombre, apellido, tipo, email, documento, sexo, telefono, direccion, fechaNacimiento, rol } = req.body;
     const connection = req.db;
 
-    // Verificar si el email ya está registrado
-    const sqlCheckEmail = 'SELECT COUNT(*) AS count FROM empleados WHERE email = ?';
-    connection.query(sqlCheckEmail, [email], (err, results) => {
-        if (err) {
-            console.error('Error al verificar el correo electrónico:', err);
-            return res.status(500).send('Error interno al verificar el correo electrónico');
-        }
+    try {
+        // Verificar si el email ya está registrado
+        const sqlCheckEmail = 'SELECT COUNT(*) AS count FROM empleados WHERE email = ?';
+        const [results] = await connection.query(sqlCheckEmail, [email]);
 
         const count = results[0].count;
         if (count > 0) {
@@ -376,55 +375,30 @@ app.post('/guardarEmpleado', (req, res) => {
         const sqlEmpleado = 'INSERT INTO empleados SET ?';
         const sqlUser = 'INSERT INTO user (name, email, password) VALUES (?, ?, ?)';
 
-        connection.beginTransaction(function(err) {
-            if (err) {
-                console.error('Error al comenzar la transacción:', err);
-                return res.status(500).send('Error interno al guardar el empleado');
-            }
+        await connection.beginTransaction();
 
-            // Insertar en la tabla empleados
-            connection.query(sqlEmpleado, nuevoEmpleado, (err, resultEmpleado) => {
-                if (err) {
-                    connection.rollback(function() {
-                        console.error('Error al guardar el empleado en la tabla "empleados":', err);
-                        return res.status(500).send('Error interno al guardar el empleado');
-                    });
-                } else {
-                    console.log('Nuevo empleado creado en la tabla "empleados":', resultEmpleado.insertId);
+        // Insertar en la tabla empleados
+        const [resultEmpleado] = await connection.query(sqlEmpleado, nuevoEmpleado);
+        console.log('Nuevo empleado creado en la tabla "empleados":', resultEmpleado.insertId);
 
-                    // Insertar en la tabla users
-                    connection.query(sqlUser, [nombre, email, clave], (err, resultUser) => {
-                        if (err) {
-                            connection.rollback(function() {
-                                console.error('Error al guardar el empleado en la tabla "users":', err);
-                                return res.status(500).send('Error interno al guardar el empleado');
-                            });
-                        } else {
-                            console.log('Nuevo usuario creado en la tabla "users":', resultUser.insertId);
+        // Insertar en la tabla users
+        const [resultUser] = await connection.query(sqlUser, [nombre, email, clave]);
+        console.log('Nuevo usuario creado en la tabla "users":', resultUser.insertId);
 
-                            // Commit la transacción si todo fue exitoso
-                            connection.commit(function(err) {
-                                if (err) {
-                                    connection.rollback(function() {
-                                        console.error('Error al hacer commit de la transacción:', err);
-                                        return res.status(500).send('Error interno al guardar el empleado');
-                                    });
-                                } else {
-                                    console.log('Transacción completada, empleado y usuario creados correctamente.');
+        // Commit la transacción si todo fue exitoso
+        await connection.commit();
+        console.log('Transacción completada, empleado y usuario creados correctamente.');
 
-                                    // Envío de correo electrónico al empleado con la clave
-                                    enviarCorreo(email, nombre, clave);
+        // Envío de correo electrónico al empleado con la clave
+        enviarCorreo(email, nombre, clave);
 
-                                    // Redirigir al usuario a la página de nuevo usuario
-                                    res.redirect('/nuevoUsuario');
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    });
+        // Redirigir al usuario a la página de nuevo usuario
+        res.redirect('/nuevoUsuario');
+    } catch (err) {
+        console.error('Error al guardar el empleado:', err);
+        await connection.rollback();
+        res.status(500).send('Error interno al guardar el empleado');
+    }
 });
 
 
@@ -504,6 +478,8 @@ function enviarCorreo(email, nombre, clave) {
 
 
 
+
+
 // Ruta para la página principal 
 app.get("/menuempresa", (req, res) => {
     if (req.session.loggedin === true) {
@@ -516,15 +492,27 @@ app.get("/menuempresa", (req, res) => {
 
 
 
-        const jefe = roles.includes('jefe');
+        const administrativo = roles.includes('administrativo');
         const empleado = roles.includes('empleado');
  
 
-        res.render("EMPRESA/menuempresa.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
+        res.render("EMPRESA/menuempresa.hbs",{ name: req.session.name,administrativo,empleado }); // Pasar los roles a la plantilla
     } else {
         res.redirect("/login");
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -540,15 +528,19 @@ app.get("/menuempleados", (req, res) => {
 
 
 
-        const jefe = roles.includes('jefe');
+        const administrativo = roles.includes('administrativo');
         const empleado = roles.includes('empleado');
  
 
-        res.render("EMPLEADOS/menuempleados.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
+        res.render("EMPLEADOS/menuempleados.hbs",{ name: req.session.name,administrativo,empleado }); // Pasar los roles a la plantilla
     } else {
         res.redirect("/login");
     }
 });
+
+
+
+
 
 
 
@@ -565,7 +557,7 @@ const moment = require('moment'); // Importa moment.js si no lo has hecho aún
 
 
 // Ruta para mostrar los datos del empleado y formulario para subir información adicional
-app.get('/subirinformacion', (req, res) => {
+app.get('/subirinformacion', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         const connection = req.db;
@@ -576,11 +568,9 @@ app.get('/subirinformacion', (req, res) => {
                              tipo_sangre, estado_civil, emergencia_nombre, emergencia_telefono, foto
                      FROM empleados 
                      WHERE nombre = ?`;
-        connection.query(sql, [nombreUsuario], (err, resultados) => {
-            if (err) {
-                console.error('Error al obtener datos del empleado:', err);
-                return res.status(500).send('Error interno al procesar la solicitud');
-            }
+
+        try {
+            const [resultados] = await connection.query(sql, [nombreUsuario]);
 
             if (resultados.length === 0) {
                 return res.status(404).send('Empleado no encontrado');
@@ -592,7 +582,10 @@ app.get('/subirinformacion', (req, res) => {
 
             // Pasar empleado a la plantilla
             res.render('EMPLEADOS/documentos/subirinformacion', { empleado });
-        });
+        } catch (err) {
+            console.error('Error al obtener datos del empleado:', err);
+            return res.status(500).send('Error interno al procesar la solicitud');
+        }
     } else {
         res.redirect("/login");
     }
@@ -601,16 +594,14 @@ app.get('/subirinformacion', (req, res) => {
 
 
 // Ruta para obtener la imagen del empleado por ID
-app.get('/imagen/:id', (req, res) => {
+app.get('/imagen/:id', async (req, res) => {
     const empleadoId = req.params.id;
     const connection = req.db;
 
     const sql = 'SELECT foto FROM empleados WHERE id = ?';
-    connection.query(sql, [empleadoId], (err, results) => {
-        if (err) {
-            console.error('Error al obtener la imagen:', err);
-            return res.status(500).send('Error interno al procesar la solicitud');
-        }
+
+    try {
+        const [results] = await connection.query(sql, [empleadoId]);
 
         if (results.length > 0 && results[0].foto) {
             // Escribir la imagen como respuesta
@@ -623,7 +614,10 @@ app.get('/imagen/:id', (req, res) => {
         } else {
             return res.status(404).send('Imagen no encontrada');
         }
-    });
+    } catch (err) {
+        console.error('Error al obtener la imagen:', err);
+        return res.status(500).send('Error interno al procesar la solicitud');
+    }
 });
 
 
@@ -631,102 +625,94 @@ app.get('/imagen/:id', (req, res) => {
 
 
 
-// Configurar almacenamiento de multer para guardar archivos en el sistema de archivos
-// Configurar almacenamiento de multer para guardar archivos en el sistema de archivos
-const storage = multer.diskStorage({
+
+// Configurar almacenamiento de multer para guardar fotos en memoria
+const storageFotos = multer.memoryStorage();
+const uploadFotos = multer({ storage: storageFotos });
+
+// Configurar almacenamiento de multer para guardar documentos en el sistema de archivos
+const storageDocumentos = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'src/uploads'); // Carpeta donde se guardarán los archivos
+        cb(null, 'src/public/uploads'); // Carpeta donde se guardarán los archivos
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname);
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+const uploadDocumentos = multer({ storage: storageDocumentos });
+
+
+
+
+// Ruta para actualizar empleados con foto
+app.post('/update', uploadFotos.single('foto'), async (req, res) => {
+    const empleado = req.body;
+    const foto = req.file; // Si no se sube ninguna foto, req.file será undefined
+    const connection = req.db;
+
+    let sql;
+    let sqlParams;
+
+    if (foto) {
+        // Se subió una nueva foto, obtener los datos binarios
+        sql = `UPDATE empleados SET 
+                   direccion = ?, 
+                   tipo_sangre = ?, 
+                   estado_civil = ?, 
+                   emergencia_nombre = ?, 
+                   emergencia_telefono = ?, 
+                   foto = ?
+               WHERE id = ?`;
+        sqlParams = [
+            empleado.direccion,
+            empleado.tipo_sangre,
+            empleado.estado_civil,
+            empleado.emergencia_nombre,
+            empleado.emergencia_telefono,
+            foto.buffer, // Foto como dato binario
+            empleado.id
+        ];
+    } else {
+        // No se subió ninguna nueva foto, actualizar sin el campo de foto
+        sql = `UPDATE empleados SET 
+                   direccion = ?, 
+                   tipo_sangre = ?, 
+                   estado_civil = ?, 
+                   emergencia_nombre = ?, 
+                   emergencia_telefono = ?
+               WHERE id = ?`;
+        sqlParams = [
+            empleado.direccion,
+            empleado.tipo_sangre,
+            empleado.estado_civil,
+            empleado.emergencia_nombre,
+            empleado.emergencia_telefono,
+            empleado.id
+        ];
     }
 
-
-
-
+    try {
+        await connection.query(sql, sqlParams);
+        res.redirect('/subirinformacion');
+    } catch (err) {
+        console.error('Error al actualizar datos del empleado:', err);
+        res.status(500).send('Error interno al procesar la solicitud');
+    }
 });
-const upload = multer({ storage: storage });
-
-
-    app.post('/update', upload.single('foto'), (req, res) => {
-        const empleado = req.body;
-        const foto = req.file; // Si no se sube ninguna foto, req.file será undefined
-        const connection = req.db;
-
-        let sql;
-        let sqlParams;
-    
-        if (foto) {
-            // Se subió una nueva foto, obtener los datos binarios
-            sql = `UPDATE empleados SET 
-                       direccion = ?, 
-                       tipo_sangre = ?, 
-                       estado_civil = ?, 
-                       emergencia_nombre = ?, 
-                       emergencia_telefono = ?, 
-                       foto = ?
-                   WHERE id = ?`;
-            sqlParams = [
-                empleado.direccion,
-                empleado.tipo_sangre,
-                empleado.estado_civil,
-                empleado.emergencia_nombre,
-                empleado.emergencia_telefono,
-                foto.buffer, // Foto como dato binario
-                empleado.id
-            ];
-        } else {
-            // No se subió ninguna nueva foto, actualizar sin el campo de foto
-            sql = `UPDATE empleados SET 
-                       direccion = ?, 
-                       tipo_sangre = ?, 
-                       estado_civil = ?, 
-                       emergencia_nombre = ?, 
-                       emergencia_telefono = ?
-                   WHERE id = ?`;
-            sqlParams = [
-                empleado.direccion,
-                empleado.tipo_sangre,
-                empleado.estado_civil,
-                empleado.emergencia_nombre,
-                empleado.emergencia_telefono,
-                empleado.id
-            ];
-        }
-    
-        connection.query(sql, sqlParams, (err, result) => {
-            if (err) {
-                console.error('Error al actualizar datos del empleado:', err);
-                return res.status(500).send('Error interno al procesar la solicitud');
-            }
-    
-            res.redirect('/subirinformacion');
-        });
-    });
-    
-
-
-
-
-
-
 
 
 
 
 
 // Ruta para obtener la imagen del empleado por ID
-app.get('/imagen/:id', (req, res) => {
+app.get('/imagen/:id', async (req, res) => {
     const empleadoId = req.params.id;
-        const connection = req.db;
+    const connection = req.db;
 
     const sql = 'SELECT foto FROM empleados WHERE id = ?';
-    connection.query(sql, [empleadoId], (err, results) => {
-        if (err) {
-            console.error('Error al obtener la imagen:', err);
-            return res.status(500).send('Error interno al procesar la solicitud');
-        }
+
+    try {
+        const [results] = await connection.query(sql, [empleadoId]);
 
         if (results.length > 0 && results[0].foto) {
             // Escribir la imagen como respuesta
@@ -739,16 +725,18 @@ app.get('/imagen/:id', (req, res) => {
         } else {
             return res.status(404).send('Imagen no encontrada');
         }
-    });
+    } catch (err) {
+        console.error('Error al obtener la imagen:', err);
+        return res.status(500).send('Error interno al procesar la solicitud');
+    }
 });
 
 
 
 
 
-
 // Ruta para mostrar los datos del empleado y formulario para subir información adicional
-app.get('/mihojadevida', (req, res) => {
+app.get('/mihojadevida', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         const connection = req.db;
@@ -759,11 +747,9 @@ app.get('/mihojadevida', (req, res) => {
                              tipo_sangre, estado_civil, emergencia_nombre, emergencia_telefono, foto
                      FROM empleados 
                      WHERE nombre = ?`;
-        connection.query(sql, [nombreUsuario], (err, resultados) => {
-            if (err) {
-                console.error('Error al obtener datos del empleado:', err);
-                return res.status(500).send('Error interno al procesar la solicitud');
-            }
+
+        try {
+            const [resultados] = await connection.query(sql, [nombreUsuario]);
 
             if (resultados.length === 0) {
                 return res.status(404).send('Empleado no encontrado');
@@ -775,7 +761,10 @@ app.get('/mihojadevida', (req, res) => {
 
             // Pasar empleado a la plantilla
             res.render('EMPLEADOS/mihojadevida.hbs', { empleado });
-        });
+        } catch (err) {
+            console.error('Error al obtener datos del empleado:', err);
+            return res.status(500).send('Error interno al procesar la solicitud');
+        }
     } else {
         res.redirect("/login");
     }
@@ -787,16 +776,8 @@ app.get('/mihojadevida', (req, res) => {
 
 
 
-
-
-// Crear el directorio 'uploads' si no existe
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-
 // Ruta para la página principal
-app.get("/subirdocumentos", (req, res) => {
+app.get("/subirdocumentos", async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         console.log(`El usuario ${nombreUsuario} está autenticado.`);
@@ -810,26 +791,29 @@ app.get("/subirdocumentos", (req, res) => {
 
         const connection = req.db;
         const query = 'SELECT * FROM documentos WHERE usuario = ?';
-        connection.query(query, [nombreUsuario], (err, results) => {
-            if (err) {
-                console.error('Error al consultar la base de datos:', err);
-                res.status(500).send('Error al cargar los documentos.');
-                return;
-            }
 
+        try {
+            const [results] = await connection.query(query, [nombreUsuario]);
             const documentos = results.length ? results[0] : null;
             res.render("EMPLEADOS/documentos/subirdocumentos.hbs", { name: req.session.name, jefe, empleado, documentos });
-        });
+        } catch (err) {
+            console.error('Error al consultar la base de datos:', err);
+            res.status(500).send('Error al cargar los documentos.');
+        }
     } else {
         res.redirect("/login");
     }
 });
 
 
+const adjustPath = (path) => {
+    if (!path) return null;
+    return path.replace(/src[\\\/]public[\\\/]/, ''); // Elimina "src/public/" o "src\public\"
+};
 
 
 // Ruta para manejar la subida de documentos
-app.post("/subirdocumentos", upload.fields([
+app.post("/subirdocumentos", uploadDocumentos.fields([
     { name: 'documentoCedula' }, 
     { name: 'documentoContratacion' }, 
     { name: 'documentoTitulo' }, 
@@ -845,36 +829,32 @@ app.post("/subirdocumentos", upload.fields([
     { name: 'documentoEPS' },
     { name: 'documentoLibretaMilitar' },
     { name: 'documentoContraloria' }
-]), (req, res) => {
+]), async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         const connection = req.db;
 
-        // Obtener las rutas de los archivos subidos, si existen
-        const documentoCedulaPath = req.files.documentoCedula ? req.files.documentoCedula[0].path : null;
-        const documentoContratacionPath = req.files.documentoContratacion ? req.files.documentoContratacion[0].path : null;
-        const documentoTituloPath = req.files.documentoTitulo ? req.files.documentoTitulo[0].path : null;
-        const documentoTituloBachillerPath = req.files.documentoTituloBachiller ? req.files.documentoTituloBachiller[0].path : null;
-        const documentoCertificacionesPath = req.files.documentoCertificaciones ? req.files.documentoCertificaciones[0].path : null;
-        const documentoRecomendacionesPath = req.files.documentoRecomendaciones ? req.files.documentoRecomendaciones[0].path : null;
-        const documentoAntecedentesPath = req.files.documentoAntecedentes ? req.files.documentoAntecedentes[0].path : null;
-        const documentoExamenMedicoPath = req.files.documentoExamenMedico ? req.files.documentoExamenMedico[0].path : null;
-        const documentoFotoPath = req.files.documentoFoto ? req.files.documentoFoto[0].path : null;
-        const documentoComprobanteDomicilioPath = req.files.documentoComprobanteDomicilio ? req.files.documentoComprobanteDomicilio[0].path : null;
-        const documentoCesantiasPath = req.files.documentoCesantias ? req.files.documentoCesantias[0].path : null;
-        const documentoHojaVidaPath = req.files.documentoHojaVida ? req.files.documentoHojaVida[0].path : null;
-        const documentoEPSPath = req.files.documentoEPS ? req.files.documentoEPS[0].path : null;
-        const documentoLibretaMilitarPath = req.files.documentoLibretaMilitar ? req.files.documentoLibretaMilitar[0].path : null;
-        const documentoContraloriaPath = req.files.documentoContraloria ? req.files.documentoContraloria[0].path : null;
+        // Obtener las rutas de los archivos subidos, si existen, y ajustar las rutas
+        const documentoCedulaPath = adjustPath(req.files.documentoCedula ? req.files.documentoCedula[0].path : null);
+        const documentoContratacionPath = adjustPath(req.files.documentoContratacion ? req.files.documentoContratacion[0].path : null);
+        const documentoTituloPath = adjustPath(req.files.documentoTitulo ? req.files.documentoTitulo[0].path : null);
+        const documentoTituloBachillerPath = adjustPath(req.files.documentoTituloBachiller ? req.files.documentoTituloBachiller[0].path : null);
+        const documentoCertificacionesPath = adjustPath(req.files.documentoCertificaciones ? req.files.documentoCertificaciones[0].path : null);
+        const documentoRecomendacionesPath = adjustPath(req.files.documentoRecomendaciones ? req.files.documentoRecomendaciones[0].path : null);
+        const documentoAntecedentesPath = adjustPath(req.files.documentoAntecedentes ? req.files.documentoAntecedentes[0].path : null);
+        const documentoExamenMedicoPath = adjustPath(req.files.documentoExamenMedico ? req.files.documentoExamenMedico[0].path : null);
+        const documentoFotoPath = adjustPath(req.files.documentoFoto ? req.files.documentoFoto[0].path : null);
+        const documentoComprobanteDomicilioPath = adjustPath(req.files.documentoComprobanteDomicilio ? req.files.documentoComprobanteDomicilio[0].path : null);
+        const documentoCesantiasPath = adjustPath(req.files.documentoCesantias ? req.files.documentoCesantias[0].path : null);
+        const documentoHojaVidaPath = adjustPath(req.files.documentoHojaVida ? req.files.documentoHojaVida[0].path : null);
+        const documentoEPSPath = adjustPath(req.files.documentoEPS ? req.files.documentoEPS[0].path : null);
+        const documentoLibretaMilitarPath = adjustPath(req.files.documentoLibretaMilitar ? req.files.documentoLibretaMilitar[0].path : null);
+        const documentoContraloriaPath = adjustPath(req.files.documentoContraloria ? req.files.documentoContraloria[0].path : null);
 
-        // Consultar si ya existen documentos subidos para el usuario
-        const query = 'SELECT * FROM documentos WHERE usuario = ?';
-        connection.query(query, [nombreUsuario], (err, results) => {
-            if (err) {
-                console.error('Error al consultar la base de datos:', err);
-                res.status(500).send('Error al verificar los documentos existentes.');
-                return;
-            }
+        try {
+            // Consultar si ya existen documentos subidos para el usuario
+            const query = 'SELECT * FROM documentos WHERE usuario = ?';
+            const [results] = await connection.query(query, [nombreUsuario]);
 
             if (results.length > 0) {
                 // Actualizar documentos existentes
@@ -896,7 +876,7 @@ app.post("/subirdocumentos", upload.fields([
                     libreta_militar_path = COALESCE(?, libreta_militar_path),
                     contraloria_path = COALESCE(?, contraloria_path)
                     WHERE usuario = ?`;
-                connection.query(updateDocumentQuery, [
+                await connection.query(updateDocumentQuery, [
                     documentoCedulaPath,
                     documentoContratacionPath,
                     documentoTituloPath,
@@ -913,18 +893,12 @@ app.post("/subirdocumentos", upload.fields([
                     documentoLibretaMilitarPath,
                     documentoContraloriaPath,
                     nombreUsuario
-                ], (err, result) => {
-                    if (err) {
-                        console.error('Error al actualizar los archivos en la base de datos:', err);
-                        res.status(500).send('Error al actualizar los archivos.');
-                    } else {
-                        res.send('Archivos actualizados exitosamente.');
-                    }
-                });
+                ]);
+                res.send('Archivos actualizados exitosamente.');
             } else {
                 // Insertar nuevos documentos
                 const insertDocumentQuery = 'INSERT INTO documentos (usuario, cedula_path, contratacion_path, titulo_path, titulo_bachiller_path, certificaciones_path, recomendaciones_path, antecedentes_path, examen_medico_path, foto_path, comprobante_domicilio_path, cesantias_path, hoja_vida_path, eps_path, libreta_militar_path, contraloria_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                connection.query(insertDocumentQuery, [
+                await connection.query(insertDocumentQuery, [
                     nombreUsuario,
                     documentoCedulaPath,
                     documentoContratacionPath,
@@ -941,49 +915,121 @@ app.post("/subirdocumentos", upload.fields([
                     documentoEPSPath,
                     documentoLibretaMilitarPath,
                     documentoContraloriaPath
-                ], (err, result) => {
-                    if (err) {
-                        console.error('Error al guardar los archivos en la base de datos:', err);
-                        res.status(500).send('Error al guardar los archivos.');
-                    } else {
-                        res.send('Archivos subidos exitosamente.');
-                    }
-                });
+                ]);
+                res.send('Archivos subidos exitosamente.');
             }
-        });
+        } catch (err) {
+            console.error('Error al manejar la subida de documentos:', err);
+            res.status(500).send('Error interno al procesar la solicitud');
+        }
     } else {
         res.redirect("/login");
     }
 });
 
 
-app.get('/verdocumentos', (req, res) => {
+
+
+
+
+// Servir archivos estáticos desde la carpeta 'src/uploads'
+app.get('/validacion', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
         const connection = req.db;
+        const query = `
+            SELECT * FROM documentos
+            WHERE 
+                COALESCE(cedula_validado, FALSE) = FALSE OR
+                COALESCE(contratacion_validado, FALSE) = FALSE OR
+                COALESCE(titulo_validado, FALSE) = FALSE OR
+                COALESCE(titulo_bachiller_validado, FALSE) = FALSE OR
+                COALESCE(certificaciones_validado, FALSE) = FALSE OR
+                COALESCE(recomendaciones_validado, FALSE) = FALSE OR
+                COALESCE(antecedentes_validado, FALSE) = FALSE OR
+                COALESCE(examen_medico_validado, FALSE) = FALSE OR
+                COALESCE(foto_validado, FALSE) = FALSE OR
+                COALESCE(comprobante_domicilio_validado, FALSE) = FALSE OR
+                COALESCE(cesantias_validado, FALSE) = FALSE OR
+                COALESCE(hoja_vida_validado, FALSE) = FALSE OR
+                COALESCE(eps_validado, FALSE) = FALSE OR
+                COALESCE(libreta_militar_validado, FALSE) = FALSE OR
+                COALESCE(contraloria_validado, FALSE) = FALSE
+        `;
 
-        // Obtener las rutas de los documentos del empleado
-        const getDocumentsQuery = 'SELECT cedula_path, contratacion_path FROM documentos WHERE usuario = ?';
-        connection.query(getDocumentsQuery, [nombreUsuario], (err, results) => {
-            if (err) {
-                console.error('Error al obtener los documentos del empleado:', err);
-                return res.status(500).send('Error al obtener los documentos.');
-            }
-
-            if (results.length === 0) {
-                return res.status(404).send('No se encontraron documentos para el usuario.');
-            }
-
-            const documentos = results[0];
-            res.render('verdocumentos', { documentos });
-        });
+        try {
+            const [results] = await connection.query(query);
+            res.render('EMPRESA/Documentos/Validar_documentos.hbs', { documentos: results });
+        } catch (err) {
+            console.error('Error al obtener los documentos no validados:', err);
+            return res.status(500).send('Error al obtener los documentos no validados.');
+        }
     } else {
+        // Manejo para el caso en que el usuario no está autenticado
         res.redirect("/login");
     }
 });
 
 
-// Start server
+
+
+app.post('/validardocumentos', async (req, res) => {
+    const data = req.body;
+    const updates = [];
+
+    // Mapping of document types to their respective columns
+    const documentColumnMap = {
+        cedula: 'cedula_validado',
+        contratacion: 'contratacion_validado',
+        titulo: 'titulo_validado',
+        titulo_bachiller: 'titulo_bachiller_validado',
+        certificaciones: 'certificaciones_validado',
+        recomendaciones: 'recomendaciones_validado',
+        antecedentes: 'antecedentes_validado',
+        examen_medico: 'examen_medico_validado',
+        foto: 'foto_validado',
+        comprobante_domicilio: 'comprobante_domicilio_validado',
+        cesantias: 'cesantias_validado',
+        hoja_vida: 'hoja_vida_validado',
+        eps: 'eps_validado',
+        libreta_militar: 'libreta_militar_validado',
+        contraloria: 'contraloria_validado'
+    };
+
+    console.log('Received data:', data);
+
+    for (const [key, value] of Object.entries(data)) {
+        const [usuario, ...documentoParts] = key.split('_');
+        const documento = documentoParts.join('_');
+        const validado = value === 'si' ? 1 : 0;
+        const column = documentColumnMap[documento];
+
+        if (column) {
+            updates.push({ validado, usuario, column });
+        } else {
+            console.warn(`Column not found for documento: ${documento}`);
+        }
+    }
+
+    try {
+        for (const update of updates) {
+            const sql = `UPDATE documentos SET ${update.column} = ? WHERE usuario = ?`;
+            console.log(`Executing SQL: ${sql} with values: [${update.validado}, ${update.usuario}]`);
+            await req.db.query(sql, [update.validado, update.usuario]);
+        }
+        res.send('Validaciones guardadas correctamente');
+    } catch (error) {
+        console.error('Error executing update:', error);
+        res.status(500).send('Ocurrió un error al guardar las validaciones');
+    }
+});
+
+
+
+
+
+
+
+
 app.listen(app.get("port"), () => {
     console.log("Server listening on port ", app.get("port"));  // Iniciar el servidor y escuchar en el puerto especificado
 });

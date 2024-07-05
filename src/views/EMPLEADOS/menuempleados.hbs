@@ -11,161 +11,15 @@
 </head>
 <body>
 <style>
-    @import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
-}
-@import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
-.fa-2x {
-font-size: 2em;
-}
-.fa {
-position: relative;
-display: table-cell;
-width: 90px;
-height: 46px;
-text-align: center;
-vertical-align: middle;
-font-size:50px;
-|}
 
+    @import url('https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css');
+    @import url('https://fonts.googleapis.com/css?family=Titillium+Web:300');
 
-.main-menu:hover,nav.main-menu.expanded {
-width:250px;
-overflow:visible;
-}
-
-.main-menu {
-background:#132e3e;
-border-right:2px solid white;
-position:absolute;
-top:0;
-bottom:0;
-height:100%;
-left:0;
-width:80px;
-overflow:hidden;
--webkit-transition:width .05s linear;
-transition:width .05s linear;
--webkit-transform:translateZ(0) scale(1,1);
-z-index:1000;
-}
-
-.main-menu>ul {
-margin:7px 0;
-}
-
-.main-menu li {
-position:relative;
-display:block;
-width:250px;
-}
-
-.main-menu li>a {
-position:relative;
-display:table;
-border-collapse:collapse;
-border-spacing:0;
-color:white;
- font-family: arial;
-font-size: 19px;
-text-decoration:none;
--webkit-transform:translateZ(0) scale(1,1);
--webkit-transition:all .1s linear;
-transition:all .1s linear;
-  
-}
-
-.main-menu .nav-icon {
-position:relative;
-display:table-cell;
-width:60px;
-height:36px;
-text-align:center;
-vertical-align:middle;
-font-size:18px;
-}
-
-.main-menu .nav-text {
-position:relative;
-display:table-cell;
-vertical-align:middle;
-width:190px;
-  font-family: 'Titillium Web', sans-serif;
-}
-
-.main-menu>ul.logout {
-position:absolute;
-left:0;
-bottom:0;
-}
-
-.no-touch .scrollable.hover {
-overflow-y:hidden;
-}
-
-.no-touch .scrollable.hover:hover {
-overflow-y:auto;
-overflow:visible;
-}
-
-a:hover,a:focus {
-text-decoration:none;
-}
-
-nav {
--webkit-user-select:none;
--moz-user-select:none;
--ms-user-select:none;
--o-user-select:none;
-user-select:none;
-}
-
-nav ul,nav li {
-outline:0;
-margin:0;
-padding:0;
-}
-.main-menu li:hover>a,nav.main-menu li.active>a,.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus,.dropdown-menu>.active>a,.dropdown-menu>.active>a:hover,.dropdown-menu>.active>a:focus,.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,.dashboard-page nav.dashboard-menu ul li.active a {
-color:#fff;
-background-color:#000000;
-}
-.area {
-float: left;
-background: #e2e2e2;
-width: 100%;
-height: 100%;
-}
-
-
-
-
-
-
-
-@font-face {
-  font-family: 'Titillium Web';
-  font-style: normal;
-  font-weight: 300;
-  src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
-}
 body {
-      font-family: Arial, sans-serif;
       background-color: #f4f4f4;
       margin: 0;
       padding: 0;
     }
-
-    header {
-     
-
-      background-color: #90c9a7;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      z-index: 1000;
-    }
-
     .menu {
       display: flex;
       flex-wrap: wrap;
@@ -232,36 +86,19 @@ body {
       text-decoration: none;
       color: black;
     }
-      header{
-padding: 15px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
-    z-index: 1500; /* Asegura que esté por encima del encabezado */
 
 
-  }
 
 
-    header{
-   left: 4%;
-padding: 15px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
-    z-index: 1500; /* Asegura que esté por encima del encabezado */
 
 
-    }
-   #ingreso{
-    padding: 4px;
-   border-radius: 3px;
-    text-align: center;
-    font-size: 30px;
-    position: relative;
-    width: 10%;
-   color: black;
-   left: 10%;
-    top: -20%;
-float: none;
 
-   }
+
+
+
+
+
+
 
 .opera{
     left: 10%;
@@ -273,9 +110,275 @@ float: none;
 background-color: #ccc;
 text-align: center;
 
+}
+
+
+body {
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      max-width: 90%;
+      margin: 80px auto 20px;
+    }
+
+    .tarjeta {
+      width: 280px;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .tarjeta:hover {
+      transform: translateY(-10px);
+    }
+
+    .imagen-circulo {
+      width: 100%;
+      height: 120px;
+      overflow: hidden;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .imagen-circulo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .titulo {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 15px 10px;
+      text-align: center;
+    }
+
+    .cuerpo {
+      padding: 15px 10px;
+    }
+
+    .cuerpo a {
+      display: block;
+      padding: 8px 0;
+      text-decoration: none;
+      color: #333;
+      text-align: center;
+      border-top: 1px solid #ccc;
+    }
+
+    .pie {
+      background:  #90c9a7;
+      border-radius: 0 0 15px 15px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .pie a {
+      text-decoration: none;
+      color: black;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.opera{
+    left: 10%;
+  align-items: center;
+  border-radius: 20px;
+  position: relative;
+  width: 20%;
+  padding: 5px;
+background-color: #ccc;
+text-align: center;
 
 }
 
+
+
+    .main-menu {
+        background: #132e3e;
+        border-right: 2px solid #90c9a7;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        left: 0;
+        width: 80px;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    .main-menu:hover {
+        width: 250px;
+    }
+
+    .main-menu ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .main-menu li {
+        position: relative;
+        display: block;
+        width: 100%;
+        margin: 20px 0;
+    }
+
+    .main-menu li a {
+        display: flex;
+        align-items: center;
+        color: white;
+        font-size: 20px;
+        text-decoration: none;
+        padding: 10px 20px;
+    }
+
+    .main-menu li a .fa {
+        width: 60px;
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .main-menu li a .nav-text {
+        flex: 1;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        white-space: nowrap;
+    }
+
+    .main-menu:hover li a .nav-text {
+        opacity: 1;
+    }
+
+    .main-menu li:hover a,
+    .main-menu li.active a {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .logout {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+    }
+
+    .main-menu:hover ~ .area {
+        margin-left: 250px;
+    }
+
+
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        max-width: 90%;
+        margin: 80px auto 20px;
+    }
+
+    .tarjeta {
+        width: 280px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .tarjeta:hover {
+        transform: translateY(-10px);
+    }
+
+    .imagen-circulo {
+        width: 100%;
+        height: 120px;
+        overflow: hidden;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .imagen-circulo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .titulo {
+        font-size: 20px;
+        font-weight: bold;
+        padding: 15px 10px;
+        text-align: center;
+    }
+
+    .cuerpo {
+        padding: 15px 10px;
+    }
+
+    .cuerpo a {
+        display: block;
+        padding: 8px 0;
+        text-decoration: none;
+        color: #333;
+        text-align: center;
+        border-top: 1px solid #ccc;
+        transition: color 0.3s;
+    }
+
+    .cuerpo a:hover {
+        color: #009688; /* Color de hover deseado */
+    }
+
+    .pie {
+        background: #132e3e;
+        border-radius: 0 0 15px 15px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .pie a {
+        text-decoration: none;
+        color: white;
+    }
+
+    .opera {
+        left: 10%;
+        align-items: center;
+        border-radius: 20px;
+        position: relative;
+        width: 20%;
+        padding: 5px;
+        background-color: #90c9a7;
+        text-align: center;
+    }
+
+    .opera h1 {
+        color: #132e3e;
+    }
 
  </style>
 
@@ -366,26 +469,9 @@ text-align: center;
 
 
 
-
-  <header>
-
-    <h1 id="ingreso">BIENVENIDO {{name}}</h1>
-    
-  </header>
-
-
-
-<br>
-<br>
-<br>
 <div class="opera">
 <h1>MENU EMPLEADOS</h1>
 </div>
-
-
-
-
-
 
 
 
@@ -397,7 +483,7 @@ text-align: center;
   </div>
   <div class="titulo">INFORMACION PERSONAL</div>
   <div class="cuerpo">
-        <a href="/subirinformacion">SUBIR DATOS</a>
+        <a href="/subirinformacion">ACTUALIZAR DATOS</a>
                 <a href="/mihojadevida">MI HOJA DE VIDA</a>
 
 
