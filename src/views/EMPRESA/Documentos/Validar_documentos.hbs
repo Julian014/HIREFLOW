@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validar Documentos</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 0;
             background-color: #f7f7f7;
         }
         header {
@@ -23,7 +22,7 @@
         h1, h2 {
             color: #413d4b;
         }
-        .employee-section, .document-section {
+        .section {
             background-color: #fff;
             padding: 20px;
             margin: 20px 0;
@@ -38,9 +37,31 @@
         .document-link:hover {
             text-decoration: underline;
         }
-        label {
-            display: block;
+        .document-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
             margin: 10px 0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .document-card p {
+            margin: 0;
+            flex: 1;
+        }
+        .document-card label {
+            margin: 0 10px;
+        }
+        .document-card .validation-options {
+            display: flex;
+            justify-content: flex-end;
+            flex: 0 0 150px;
+        }
+        .validation-options label {
+            margin: 0 10px;
+            white-space: nowrap;
         }
         button {
             background-color: #90c9a7;
@@ -49,6 +70,7 @@
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #76b090;
@@ -56,166 +78,196 @@
         .hidden {
             display: none;
         }
+        select, .search-box {
+            width: 100%;
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
     </style>
     <script>
-        function showDocuments(usuario) {
-            const sections = document.querySelectorAll('.document-section');
-            sections.forEach(section => {
-                if (section.dataset.usuario === usuario) {
-                    section.classList.remove('hidden');
-                } else {
-                    section.classList.add('hidden');
-                }
+        function mostrarDocumentos() {
+            const usuario = document.getElementById('empleados').value;
+            const secciones = document.querySelectorAll('.document-section');
+            secciones.forEach(seccion => {
+                seccion.classList.toggle('hidden', seccion.dataset.usuario !== usuario);
+            });
+        }
+
+        function filtrarUsuarios() {
+            const filtro = document.getElementById('filtro').value.toLowerCase();
+            const opciones = document.querySelectorAll('#empleados option');
+            opciones.forEach(opcion => {
+                const texto = opcion.textContent.toLowerCase();
+                opcion.style.display = texto.includes(filtro) ? '' : 'none';
             });
         }
     </script>
 </head>
 <body>
 
-    <header>
-        <h1>Validar Documentos de Empleados</h1>
-    </header>
+<header>
+    <h1>Validación de Documentos de Empleados</h1>
+</header>
 
-    <main>
-        <div class="employee-section">
-            <h2>Lista de Empleados</h2>
-            <ul>
-                {{#each documentos}}
-                <li><a href="javascript:void(0)" onclick="showDocuments('{{this.usuario}}')">{{this.usuario}}</a></li>
-                {{/each}}
-            </ul>
-        </div>
-
-<form action="/validardocumentos" method="post">
-    {{#each documentos}}
-    <div class="document-section hidden" data-usuario="{{this.usuario}}">
-        <h2>Empleado: {{this.usuario}}</h2>
-        {{#if (not this.cedula_validado)}}
-        <p>Cédula: <a class="document-link" href="{{this.cedula_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_cedula" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_cedula" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.contratacion_validado)}}
-        <p>Contratación: <a class="document-link" href="{{this.contratacion_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_contratacion" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_contratacion" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.titulo_validado)}}
-        <p>Título: <a class="document-link" href="{{this.titulo_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_titulo" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_titulo" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.titulo_bachiller_validado)}}
-        <p>Título Bachiller: <a class="document-link" href="{{this.titulo_bachiller_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_titulo_bachiller" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_titulo_bachiller" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.certificaciones_validado)}}
-        <p>Certificaciones: <a class="document-link" href="{{this.certificaciones_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_certificaciones" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_certificaciones" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.recomendaciones_validado)}}
-        <p>Recomendaciones: <a class="document-link" href="{{this.recomendaciones_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_recomendaciones" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_recomendaciones" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.antecedentes_validado)}}
-        <p>Antecedentes: <a class="document-link" href="{{this.antecedentes_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_antecedentes" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_antecedentes" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.examen_medico_validado)}}
-        <p>Examen Médico: <a class="document-link" href="{{this.examen_medico_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_examen_medico" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_examen_medico" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.foto_validado)}}
-        <p>Foto: <a class="document-link" href="{{this.foto_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_foto" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_foto" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.comprobante_domicilio_validado)}}
-        <p>Comprobante de Domicilio: <a class="document-link" href="{{this.comprobante_domicilio_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_comprobante_domicilio" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_comprobante_domicilio" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.cesantias_validado)}}
-        <p>Cesantías: <a class="document-link" href="{{this.cesantias_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_cesantias" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_cesantias" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.hoja_vida_validado)}}
-        <p>Hoja de Vida: <a class="document-link" href="{{this.hoja_vida_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_hoja_vida" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_hoja_vida" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.eps_validado)}}
-        <p>EPS: <a class="document-link" href="{{this.eps_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_eps" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_eps" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.libreta_militar_validado)}}
-        <p>Libreta Militar: <a class="document-link" href="{{this.libreta_militar_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_libreta_militar" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_libreta_militar" value="no"> No
-        </label>
-        {{/if}}
-        {{#if (not this.contraloria_validado)}}
-        <p>Contraloría: <a class="document-link" href="{{this.contraloria_path}}" target="_blank">Ver Documento</a></p>
-        <label>
-            Validado:
-            <input type="radio" name="{{this.usuario}}_contraloria" value="si"> Sí
-            <input type="radio" name="{{this.usuario}}_contraloria" value="no"> No
-        </label>
-        {{/if}}
+<main>
+    <div class="section">
+        <h2>Lista de Empleados</h2>
+        <input type="text" id="filtro" class="search-box" placeholder="Buscar por nombre de usuario" oninput="filtrarUsuarios()">
+        <select id="empleados" onchange="mostrarDocumentos()">
+            <option value="" disabled selected>Selecciona un empleado</option>
+            {{#each documentos}}
+            <option value="{{this.usuario}}">{{this.usuario}}</option>
+            {{/each}}
+        </select>
     </div>
-    {{/each}}
-    <button type="submit">Guardar Validaciones</button>
-</form>
 
-    </main>
+    <form action="/validardocumentos" method="post">
+        {{#each documentos}}
+        <div class="section document-section hidden" data-usuario="{{this.usuario}}">
+            <h2>Empleado: {{this.usuario}}</h2>
+            {{#if (not this.cedula_validado)}}
+            <div class="document-card">
+                <p>Cédula: <a class="document-link" href="{{this.cedula_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_cedula" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_cedula" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.contratacion_validado)}}
+            <div class="document-card">
+                <p>Contratación: <a class="document-link" href="{{this.contratacion_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_contratacion" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_contratacion" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.titulo_validado)}}
+            <div class="document-card">
+                <p>Título: <a class="document-link" href="{{this.titulo_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_titulo" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_titulo" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.titulo_bachiller_validado)}}
+            <div class="document-card">
+                <p>Título de Bachiller: <a class="document-link" href="{{this.titulo_bachiller_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_titulo_bachiller" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_titulo_bachiller" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.certificaciones_validado)}}
+            <div class="document-card">
+                <p>Certificaciones: <a class="document-link" href="{{this.certificaciones_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_certificaciones" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_certificaciones" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.recomendaciones_validado)}}
+            <div class="document-card">
+                <p>Recomendaciones: <a class="document-link" href="{{this.recomendaciones_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_recomendaciones" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_recomendaciones" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.antecedentes_validado)}}
+            <div class="document-card">
+                <p>Antecedentes: <a class="document-link" href="{{this.antecedentes_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_antecedentes" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_antecedentes" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.examen_medico_validado)}}
+            <div class="document-card">
+                <p>Examen Médico: <a class="document-link" href="{{this.examen_medico_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_examen_medico" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_examen_medico" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.foto_validado)}}
+            <div class="document-card">
+                <p>Foto: <a class="document-link" href="{{this.foto_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_foto" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_foto" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.comprobante_domicilio_validado)}}
+            <div class="document-card">
+                <p>Comprobante de Domicilio: <a class="document-link" href="{{this.comprobante_domicilio_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_comprobante_domicilio" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_comprobante_domicilio" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.cesantias_validado)}}
+            <div class="document-card">
+                <p>Cesantías: <a class="document-link" href="{{this.cesantias_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_cesantias" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_cesantias" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.hoja_vida_validado)}}
+            <div class="document-card">
+                <p>Hoja de Vida: <a class="document-link" href="{{this.hoja_vida_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_hoja_vida" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_hoja_vida" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.eps_validado)}}
+            <div class="document-card">
+                <p>EPS: <a class="document-link" href="{{this.eps_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_eps" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_eps" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.libreta_militar_validado)}}
+            <div class="document-card">
+                <p>Libreta Militar: <a class="document-link" href="{{this.libreta_militar_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_libreta_militar" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_libreta_militar" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+            {{#if (not this.contraloria_validado)}}
+            <div class="document-card">
+                <p>Contraloría: <a class="document-link" href="{{this.contraloria_path}}" target="_blank">Ver Documento</a></p>
+                <div class="validation-options">
+                    <label><input type="radio" name="{{this.usuario}}_contraloria" value="si"> Sí</label>
+                    <label><input type="radio" name="{{this.usuario}}_contraloria" value="no"> No</label>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+        {{/each}}
+        <button type="submit">Guardar Validaciones</button>
+    </form>
+
+</main>
 
 </body>
 </html>

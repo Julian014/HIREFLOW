@@ -29,7 +29,7 @@ const pool = mysql.createPool({
     host: '127.0.0.1',
     user: 'root',
     password: '',
-    database: 'Recursos_Humanos',
+    database: 'appnueva',
     waitForConnections: true,
     connectionLimit: 10, // Número máximo de conexiones en el pool
     queueLimit: 0 // Número máximo de solicitudes en cola (0 = ilimitado)
@@ -37,18 +37,6 @@ const pool = mysql.createPool({
 
 // Exporta el pool para usarlo en otros módulos
 module.exports = pool;
-
-
-// Session middleware
-app.use(session({
-    secret: "secret",  // Clave secreta para firmar la cookie de sesión
-    resave: true,  // Forzar a que la sesión se guarde de nuevo en el almacenamiento de sesiones
-    saveUninitialized: true  // Forzar a que una sesión se guarde, aunque no haya datos para almacenar
-}));
-
-
-
-
 
 // Middleware para pasar una conexión del pool a cada objeto de solicitud
 app.use(async (req, res, next) => {
@@ -62,6 +50,24 @@ app.use(async (req, res, next) => {
         next(err);
     }
 });
+
+
+
+
+
+
+
+// Session middleware
+app.use(session({
+    secret: "secret",  // Clave secreta para firmar la cookie de sesión
+    resave: true,  // Forzar a que la sesión se guarde de nuevo en el almacenamiento de sesiones
+    saveUninitialized: true  // Forzar a que una sesión se guarde, aunque no haya datos para almacenar
+}));
+
+
+
+
+
 
 // Render login form
 app.get("/login", (req, res) => {
@@ -1026,7 +1032,47 @@ app.post('/validardocumentos', async (req, res) => {
 
 
 
-
+async function getUsuariosConDocumentosValidados() {
+    const query = `
+        SELECT usuario, cedula_validado, contratacion_validado, titulo_validado, titulo_bachiller_validado, 
+               certificaciones_validado, recomendaciones_validado, antecedentes_validado, examen_medico_validado, 
+               foto_validado, comprobante_domicilio_validado, cesantias_validado, hoja_vida_validado, 
+               eps_validado, libreta_militar_validado, contraloria_validado
+        FROM documentos
+        WHERE 
+            cedula_validado = '1' AND
+            contratacion_validado = '1' AND
+            titulo_validado = '1' AND
+            titulo_bachiller_validado = '1' AND
+            certificaciones_validado = '1' AND
+            recomendaciones_validado = '1' AND
+            antecedentes_validado = '1' AND
+            examen_medico_validado = '1' AND
+            foto_validado = '1' AND
+            comprobante_domicilio_validado = '1' AND
+            cesantias_validado = '1' AND
+            hoja_vida_validado = '1' AND
+            eps_validado = '1' AND
+            libreta_militar_validado = '1' AND
+            contraloria_validado = '1';
+    `;
+    
+    const [rows] = await pool.query(query);
+    return rows;
+}
+app.get('/enviar_contrato', async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const usuarios = await getUsuariosConDocumentosValidados();
+            res.render('EMPRESA/contrato/enviar contrtato.hbs', { usuarios });
+        } catch (error) {
+            console.error(error);
+            res.render('EMPRESA/usuarios_con_documentos_validados.hbs', { error: 'Error al obtener los usuarios.' });
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
 
 
 
