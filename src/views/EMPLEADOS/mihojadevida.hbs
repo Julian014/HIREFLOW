@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Profile</title>
+    <title>Hoja de Vida del Empleado</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -95,7 +95,7 @@
     <div id="container">
         <div id="left-sec">
             <div id="imges">
-                <img id="fotoEmpleado" src="/imagen/{{empleado.id}}" alt="Foto del Conductor">
+                <img id="fotoEmpleado" src="/imagen/{{empleado.id}}" alt="Foto del Empleado">
             </div>
             <div>
                 <h2>Información Personal</h2>
@@ -105,24 +105,14 @@
                 <p><strong>N° de Documento:</strong> {{empleado.documento}}</p>
                 <p><strong>Fecha de Nacimiento:</strong> {{empleado.fechaNacimiento}}</p>
                 <p><strong>Sexo:</strong> {{empleado.sexo}}</p>
+                <p><strong>Tipo de Sangre:</strong> {{empleado.tipo_sangre}}</p>
+                <p><strong>Estado Civil:</strong> {{empleado.estado_civil}}</p>
             </div>
             <div>
                 <h2>Contacto</h2>
                 <p><strong>Dirección:</strong> {{empleado.direccion}}</p>
                 <p><strong>Email:</strong> {{empleado.email}}</p>
                 <p><strong>Celular:</strong> {{empleado.telefono}}</p>
-            </div>
-            <div id="skill">
-                <h2>Cursos</h2>
-                <ul>
-                    <li>{{empleado.curso1}}</li>
-                    <li>{{empleado.curso2}}</li>
-                    <li>{{empleado.curso3}}</li>
-                </ul>
-            </div>
-            <div>
-                <h2>Estado Civil</h2>
-                <p>{{empleado.estado_civil}}</p>
             </div>
         </div>
         <div id="right-sec">
@@ -136,24 +126,24 @@
             </div>
             <div>
                 <h2>Experiencia</h2>
-                <h4>{{empleado.tituloexpecia1}}</h4>
-                <p>{{empleado.descripcionexpecia1}}</p>
+                <h4>{{empleado.titulo_experiencia1}}</h4>
+                <p>{{empleado.descripcion_experiencia1}}</p>
                 <ul>
-                    <li>{{empleado.funciones1}}</li>
-                    <li>{{empleado.funciones2}}</li>
+                    <li>{{empleado.funcion1}}</li>
+                    <li>{{empleado.funcion2}}</li>
                 </ul>
-                <h4>{{empleado.tituloexpecia2}}</h4>
-                <p>{{empleado.descripcionexpecia2}}</p>
+                <h4>{{empleado.titulo_experiencia2}}</h4>
+                <p>{{empleado.descripcion_experiencia2}}</p>
                 <ul>
-                    <li>{{empleado.funciones3}}</li>
-                    <li>{{empleado.funciones4}}</li>
+                    <li>{{empleado.funcion3}}</li>
+                    <li>{{empleado.funcion4}}</li>
                 </ul>
             </div>
             <div>
                 <h2>Educación</h2>
                 <table>
                     <tr>
-                        <th>Universidad/Colegio</th>
+                        <th>Institución</th>
                         <th>Año de Graduación</th>
                         <th>Porcentaje/CGPA</th>
                     </tr>

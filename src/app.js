@@ -1337,6 +1337,79 @@ app.post('/guardar_contrato', async (req, res) => {
 
 
 
+// Ruta para obtener el número total de empleados
+app.get('/api/empleados', async (req, res) => {
+    try {
+        const [rows] = await req.db.query('SELECT COUNT(*) as count FROM empleados');
+        res.json({ count: rows[0].count });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Ruta para obtener el número de contratos
+app.get('/api/contratos', async (req, res) => {
+    try {
+        const [rows] = await req.db.query('SELECT COUNT(*) as count FROM contratos');
+        res.json({ count: rows[0].count });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Ruta para obtener el número de empleados creados hoy
+app.get('/api/empleados/hoy', async (req, res) => {
+    try {
+        const [rows] = await req.db.query('SELECT COUNT(*) as count FROM empleados WHERE fecha_creacion = CURRENT_DATE');
+        res.json({ count: rows[0].count });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+const exphbs = require('express-handlebars');
+
+app.get('/vermidocumentacion', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        try {
+            const [documentos] = await req.db.query('SELECT * FROM documentos WHERE usuario = ?', [nombreUsuario]);
+            
+            // Agregar campos para indicar el estado de verificación de los documentos
+            const formattedDocumentos = documentos.map(doc => ({
+                ...doc,
+                cedula_validado: getVerificationStatus(doc.cedula_validado),
+                contratacion_validado: getVerificationStatus(doc.contratacion_validado),
+                titulo_validado: getVerificationStatus(doc.titulo_validado),
+                titulo_bachiller_validado: getVerificationStatus(doc.titulo_bachiller_validado),
+                certificaciones_validado: getVerificationStatus(doc.certificaciones_validado),
+                recomendaciones_validado: getVerificationStatus(doc.recomendaciones_validado),
+                antecedentes_validado: getVerificationStatus(doc.antecedentes_validado),
+                examen_medico_validado: getVerificationStatus(doc.examen_medico_validado),
+                foto_validado: getVerificationStatus(doc.foto_validado),
+                comprobante_domicilio_validado: getVerificationStatus(doc.comprobante_domicilio_validado),
+                cesantias_validado: getVerificationStatus(doc.cesantias_validado),
+                hoja_vida_validado: getVerificationStatus(doc.hoja_vida_validado),
+                eps_validado: getVerificationStatus(doc.eps_validado),
+                libreta_militar_validado: getVerificationStatus(doc.libreta_militar_validado),
+                contraloria_validado: getVerificationStatus(doc.contraloria_validado)
+            }));
+
+            res.render('EMPLEADOS/documentos/midocumentacion', { nombreUsuario, documentos: formattedDocumentos });
+        } catch (err) {
+            res.status(500).send('Error al obtener la documentación.');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+function getVerificationStatus(status) {
+    if (status === '1') return 'Verificado';
+    if (status === '0') return 'Rechazado';
+    return 'Pendiente';
+}
 
 
 app.listen(app.get("port"), () => {

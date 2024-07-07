@@ -7,8 +7,7 @@
 <style>
     @import url('https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css');
     @import url('https://fonts.googleapis.com/css?family=Titillium+Web:300');
-
-
+    
     .main-menu {
         background: #132e3e;
         border-right: 2px solid #90c9a7;
@@ -20,6 +19,7 @@
         width: 80px;
         overflow: hidden;
         z-index: 1000;
+        transition: width 0.2s;
     }
 
     .main-menu:hover {
@@ -82,99 +82,204 @@
         padding: 20px;
         background: #e2e2e2;
         height: 100vh;
+        overflow-y: auto;
     }
 
     .main-menu:hover ~ .area {
         margin-left: 250px;
     }
-    
+
+    .chart-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    .chart-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+        flex: 1 1 calc(33% - 40px);
+        max-width: calc(33% - 40px);
+        box-sizing: border-box;
+    }
+
+    .chart-box h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #132e3e;
+    }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-   <div class="area"></div><nav class="main-menu">
-            <ul>
-                <br>
-                <li>
-                    <a href="/">
-                        <i class="fa fa-home fa-2x"></i>
-                        <span class="nav-text">
-                          menu principal
-                        </span>
-                    </a>
-                  
-                </li>
-                <br>
-                  <br>
-                  <li>
+    <div class="area">
+        <div class="chart-container">
+            <div class="chart-box">
+                <h3>Empleados</h3>
+                <canvas id="empleadosChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>Empleados creados hoy</h3>
+                <canvas id="empleadosHoyChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>Contratos</h3>
+                <canvas id="contratosChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <nav class="main-menu">
+        <ul>
+            <li>
+                <a href="/">
+                    <i class="fa fa-home fa-2x"></i>
+                    <span class="nav-text">Menu Principal</span>
+                </a>
+            </li>
+            {{#if administrativo}}
+            <li>
+                <a href="/menuempresa">
+                    <i class="fa fa-building-o fa-2x"></i>
+                    <span class="nav-text">Menú Empresa</span>
+                </a>
+            </li>
+            {{/if}}
+            <li class="has-subnav">
+                <a href="/menuempleados">
+                    <i class="fa fa-user fa-2x"></i>
+                    <span class="nav-text">Menu Empleados</span>
+                </a>
+            </li>
+            <li class="has-subnav">
+                <a href="#">
+                    <i class="fa fa-wrench fa-2x"></i>
+                    <span class="nav-text">Soporte</span>
+                </a>
+            </li>
+            {{#if administrativo}}
+            <li class="has-subnav">
+                <a href="#">
+                    <i class="fa fa-cogs fa-2x"></i>
+                    <span class="nav-text">Configuración</span>
+                </a>
+            </li>
+            {{/if}}
+        </ul>
+        <ul class="logout">
+            <li>
+                <a href="/logout">
+                    <i class="fa fa-power-off fa-2x"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
-     <li>
+    <script>
+        async function fetchData(url) {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.count;
+        }
 
-     {{#if administrativo}}
+        async function renderCharts() {
+            const empleadosCount = await fetchData('/api/empleados');
+            const empleadosHoyCount = await fetchData('/api/empleados/hoy');
+            const contratosCount = await fetchData('/api/contratos');
 
-<li>
-    <a href="/menuempresa">
-        <i class="fa fa-building-o fa-2x"></i>
-        <span class="nav-text">
-            Menú Empresa
-        </span>
-    </a>
-</li>
-   {{/if}}
+            const empleadosData = {
+                labels: ['Empleados'],
+                datasets: [{
+                    label: 'Número de Empleados',
+                    data: [empleadosCount],
+                    backgroundColor: ['rgba(144, 201, 167, 0.5)'],
+                    borderColor: ['#90c9a7'],
+                    borderWidth: 1
+                }]
+            };
 
+            const empleadosHoyData = {
+                labels: ['Empleados creados hoy'],
+                datasets: [{
+                    label: 'Número de Empleados creados hoy',
+                    data: [empleadosHoyCount],
+                    backgroundColor: ['rgba(243, 156, 18, 0.5)'],
+                    borderColor: ['#f39c12'],
+                    borderWidth: 1
+                }]
+            };
 
-                  <br>
-                 
-                <br>
-                <li class="has-subnav">
-                    <a href="/menuempleados">
-        <i class="fa fa-user fa-2x"></i>
-                        <span class="nav-text">
-                                     menu empleados
-                        </span>
-                    </a>
-                    
-                </li>
-                <br> 
-                <br>
+            const contratosData = {
+                labels: ['Contratos'],
+                datasets: [{
+                    label: 'Número de Contratos',
+                    data: [contratosCount],
+                    backgroundColor: ['rgba(65, 61, 75, 0.5)'],
+                    borderColor: ['#413d4b'],
+                    borderWidth: 1
+                }]
+            };
 
-            
+            const config = {
+                type: 'bar',
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#132e3e',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#132e3e',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#132e3e',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            };
 
+            new Chart(
+                document.getElementById('empleadosChart'),
+                {...config, data: empleadosData}
+            );
 
-            
-                           <li class="has-subnav">
-                    <a href="#">
-        <i class="fa fa-wrench fa-2x"></i>
-                        <span id="texx" class="nav-text">
-                            Soporte
-                        </span>
-                    </a>
-                   
-                </li>
-             <br>
-             <br>
- {{#if administrativo}}
-               <li class="has-subnav">
-                    <a href="#">
-        <i class="fa fa-cogs fa-2x"></i>
-                        <span class="nav-text">
-                            configuracion
-                        </span>
-                    </a>
-                    
-                </li>
-                <br>
-                <br>
-                   {{/if}}
-            </ul>
+            new Chart(
+                document.getElementById('empleadosHoyChart'),
+                {...config, data: empleadosHoyData}
+            );
 
- <ul class="logout"><li>
-<a href="/logout">
-<i class="fa fa-power-off fa-2x"></i>
- <span class="nav-text">Logout</span>
- </a>
- </li>  
- </ul>
- </nav>
+            new Chart(
+                document.getElementById('contratosChart'),
+                {...config, data: contratosData}
+            );
+        }
 
+        renderCharts();
+    </script>
 </body>
 </html>

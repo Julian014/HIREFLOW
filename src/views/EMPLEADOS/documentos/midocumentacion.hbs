@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Documentación</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+          
+        }
+        #container {
+            width: 90%;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #413d4b;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #90c9a7;
+            color: #fff;
+        }
+        td a {
+            color: #413d4b;
+            text-decoration: none;
+        }
+        .verificado {
+            color: green;
+            font-weight: bold;
+        }
+        .rechazado {
+            color: red;
+            font-weight: bold;
+        }
+        .pendiente {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Documentación de {{nombreUsuario}}</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo de Documento</th>
+                    <th>Enlace</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each documentos}}
+                <tr>
+                    <td>Cédula</td>
+                    <td>{{#if cedula_path}}<a href="{{cedula_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{cedula_validado}}">{{cedula_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Contratación</td>
+                    <td>{{#if contratacion_path}}<a href="{{contratacion_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{contratacion_validado}}">{{contratacion_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Título</td>
+                    <td>{{#if titulo_path}}<a href="{{titulo_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{titulo_validado}}">{{titulo_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Título de Bachiller</td>
+                    <td>{{#if titulo_bachiller_path}}<a href="{{titulo_bachiller_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{titulo_bachiller_validado}}">{{titulo_bachiller_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Certificaciones</td>
+                    <td>{{#if certificaciones_path}}<a href="{{certificaciones_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{certificaciones_validado}}">{{certificaciones_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Recomendaciones</td>
+                    <td>{{#if recomendaciones_path}}<a href="{{recomendaciones_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{recomendaciones_validado}}">{{recomendaciones_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Antecedentes</td>
+                    <td>{{#if antecedentes_path}}<a href="{{antecedentes_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{antecedentes_validado}}">{{antecedentes_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Examen Médico</td>
+                    <td>{{#if examen_medico_path}}<a href="{{examen_medico_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{examen_medico_validado}}">{{examen_medico_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Foto</td>
+                    <td>{{#if foto_path}}<a href="{{foto_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{foto_validado}}">{{foto_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Comprobante de Domicilio</td>
+                    <td>{{#if comprobante_domicilio_path}}<a href="{{comprobante_domicilio_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{comprobante_domicilio_validado}}">{{comprobante_domicilio_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Cesantías</td>
+                    <td>{{#if cesantias_path}}<a href="{{cesantias_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{cesantias_validado}}">{{cesantias_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Hoja de Vida</td>
+                    <td>{{#if hoja_vida_path}}<a href="{{hoja_vida_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{hoja_vida_validado}}">{{hoja_vida_validado}}</td>
+                </tr>
+                <tr>
+                    <td>EPS</td>
+                    <td>{{#if eps_path}}<a href="{{eps_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{eps_validado}}">{{eps_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Libreta Militar</td>
+                    <td>{{#if libreta_militar_path}}<a href="{{libreta_militar_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{libreta_militar_validado}}">{{libreta_militar_validado}}</td>
+                </tr>
+                <tr>
+                    <td>Contraloría</td>
+                    <td>{{#if contraloria_path}}<a href="{{contraloria_path}}" target="_blank">Ver Documento</a>{{else}}No disponible{{/if}}</td>
+                    <td class="{{contraloria_validado}}">{{contraloria_validado}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
