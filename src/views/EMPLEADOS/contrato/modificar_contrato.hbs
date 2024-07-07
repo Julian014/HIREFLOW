@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Contrato</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+        header {
+            background-color: #90c9a7;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #413d4b;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #90c9a7;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #78b089;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Modificar Contrato</h1>
+</header>
+
+<main>
+    <div class="section">
+        <h2>Ingrese los detalles del contrato</h2>
+        <form id="contract-form">
+            <input type="hidden" id="usuario" name="usuario" value="{{usuario}}">
+
+            <label for="ciudad">Ciudad</label>
+            <input type="text" id="ciudad" name="ciudad" required>
+
+            <label for="pais">País</label>
+            <input type="text" id="pais" name="pais" required>
+
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" required>
+
+            <label for="cargo_empleado">Cargo del Empleado</label>
+            <input type="text" id="cargo_empleado" name="cargo_empleado" required>
+
+            <label for="duracion_contrato">Duración del Contrato</label>
+            <input type="text" id="duracion_contrato" name="duracion_contrato" required>
+
+            <label for="fecha_inicio">Fecha de Inicio</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+
+            <label for="fecha_terminacion">Fecha de Terminación</label>
+            <input type="date" id="fecha_terminacion" name="fecha_terminacion">
+            <label>
+                <input type="checkbox" id="indefinido" name="indefinido"> Indefinido
+            </label>
+
+            <label for="horas_trabajo">Horas de Trabajo</label>
+            <input type="text" id="horas_trabajo" name="horas_trabajo" required>
+
+            <label for="dia_inicio">Día de Inicio</label>
+            <input type="text" id="dia_inicio" name="dia_inicio" required>
+
+            <label for="dia_fin">Día de Fin</label>
+            <input type="text" id="dia_fin" name="dia_fin" required>
+
+            <label for="horario_trabajo">Horario de Trabajo</label>
+            <input type="text" id="horario_trabajo" name="horario_trabajo" required>
+
+            <label for="monto_salario">Monto del Salario</label>
+            <input type="text" id="monto_salario" name="monto_salario" required>
+
+            <label for="moneda">Moneda</label>
+            <input type="text" id="moneda" name="moneda" required>
+
+            <label for="periodicidad_pago">Periodicidad del Pago</label>
+            <input type="text" id="periodicidad_pago" name="periodicidad_pago" required>
+
+            <label for="dia_pago">Día de Pago</label>
+            <input type="text" id="dia_pago" name="dia_pago" required>
+
+            <button type="submit">Generar Contrato</button>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.getElementById('indefinido').addEventListener('change', function() {
+        const fechaTerminacion = document.getElementById('fecha_terminacion');
+        if (this.checked) {
+            fechaTerminacion.value = '';
+            fechaTerminacion.disabled = true;
+        } else {
+            fechaTerminacion.disabled = false;
+        }
+    });
+
+    document.getElementById('contract-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const formProps = Object.fromEntries(formData);
+
+        if (formProps.indefinido) {
+            formProps.fecha_terminacion = 'Indefinido';
+        }
+        
+        try {
+            const response = await fetch('/generar_contrato', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formProps)
+            });
+            if (response.ok) {
+                alert('Contrato generado correctamente');
+                window.location.href = '/enviar_contrato';
+            } else {
+                alert('Error al generar el contrato');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al generar el contrato');
+        }
+    });
+</script>
+
+</body>
+</html>

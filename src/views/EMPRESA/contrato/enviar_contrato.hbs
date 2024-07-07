@@ -48,6 +48,9 @@
         .error {
             color: red;
         }
+        .contract-button {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +70,7 @@
                 <li>
                     {{this.usuario}}
                     <div class="validated">Todos los documentos están validados</div>
+                    <button class="contract-button" onclick="window.location.href='/modificar_contrato/{{this.usuario}}'">Generar Contrato</button>
                 </li>
                 {{/each}}
             </ul>

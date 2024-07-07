@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firma del Contrato</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+        header {
+            background-color: #90c9a7;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .page {
+            background-color: #fff;
+            padding: 40px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #413d4b;
+            margin-bottom: 10px;
+        }
+        #signature-pad {
+            border: 1px solid #000;
+            background-color: #fff;
+            margin-top: 20px;
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #signature-pad canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .signature-buttons {
+            margin-top: 10px;
+            text-align: center;
+        }
+        button {
+            background-color: #90c9a7;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #78b089;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+    <h1>Firma del Contrato</h1>
+</header>
+
+<main>
+    <div class="page">
+        <h2>Por favor, firme a continuación</h2>
+        <div id="signature-pad">
+            <canvas></canvas>
+        </div>
+        <div class="signature-buttons">
+            <button onclick="clearSignature()">Limpiar</button>
+            <button onclick="saveSignature()">Guardar Firma</button>
+        </div>
+    </div>
+</main>
+
+<script>
+    let signaturePad;
+    const usuario = '{{usuario}}';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.querySelector('#signature-pad canvas');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        signaturePad = new SignaturePad(canvas);
+
+        window.addEventListener('resize', () => {
+            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext('2d').scale(ratio, ratio);
+            signaturePad.clear(); // otherwise isEmpty() might return incorrect value
+        });
+    });
+
+    function clearSignature() {
+        signaturePad.clear();
+    }
+
+    async function saveSignature() {
+        if (signaturePad.isEmpty()) {
+            alert('Por favor, realice la firma.');
+            return;
+        }
+        const signatureData = signaturePad.toDataURL('image/png');
+        try {
+            const response = await fetch('/guardar_firma', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ usuario, signature: signatureData })
+            });
+            if (response.ok) {
+                window.location.href = '/ver_contrato_firmado/' + usuario;
+            } else {
+                alert('Error al guardar la firma');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al guardar la firma');
+        }
+    }
+</script>
+
+</body>
+</html>

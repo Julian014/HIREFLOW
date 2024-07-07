@@ -27,6 +27,7 @@
     "nodemailer": "^6.9.13",
     "path": "^0.12.7",
     "pdfkit": "^0.14.0",
+    "signature_pad": "^5.0.2",
     "webhook": "^0.0.2"
   },
   "devDependencies": {
