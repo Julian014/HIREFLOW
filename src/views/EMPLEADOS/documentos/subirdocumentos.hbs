@@ -136,7 +136,7 @@
             <div class="form-group">
                 <div>
                     <label for="documentoCedula">Seleccionar cédula (PDF):</label>
-                    <input type="file" name="documentoCedula" id="documentoCedula" accept="application/pdf" {{#if documentos.cedula_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoCedula" id="documentoCedula" accept="application/pdf" {{#if documentos.cedula_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoCedula">Seleccionar cédula</label>
                     <div class="drop-zone" data-for="documentoCedula">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -151,7 +151,7 @@
                 </div>
                 <div>
                     <label for="documentoContratacion">Seleccionar documentos de contratación (PDF):</label>
-                    <input type="file" name="documentoContratacion" id="documentoContratacion" accept="application/pdf" {{#if documentos.contratacion_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoContratacion" id="documentoContratacion" accept="application/pdf" {{#if documentos.contratacion_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoContratacion">Seleccionar documentos de contratación</label>
                     <div class="drop-zone" data-for="documentoContratacion">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -166,7 +166,7 @@
                 </div>
                 <div>
                     <label for="documentoTitulo">Seleccionar título profesional (PDF):</label>
-                    <input type="file" name="documentoTitulo" id="documentoTitulo" accept="application/pdf" {{#if documentos.titulo_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoTitulo" id="documentoTitulo" accept="application/pdf" {{#if documentos.titulo_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoTitulo">Seleccionar título profesional</label>
                     <div class="drop-zone" data-for="documentoTitulo">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -181,7 +181,7 @@
                 </div>
                 <div>
                     <label for="documentoTituloBachiller">Seleccionar título de bachiller (PDF):</label>
-                    <input type="file" name="documentoTituloBachiller" id="documentoTituloBachiller" accept="application/pdf" {{#if documentos.titulo_bachiller_path}}disabled{{/if}} required>
+<input type="file" name="documentoTituloBachiller" id="documentoTituloBachiller" accept="application/pdf" {{#unless documentos.titulo_bachiller_path}}{{/unless}} {{#if documentos.titulo_bachiller_path}}disabled{{/if}}>
                     <label class="file-label" for="documentoTituloBachiller">Seleccionar título de bachiller</label>
                     <div class="drop-zone" data-for="documentoTituloBachiller">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -196,7 +196,7 @@
                 </div>
                 <div>
                     <label for="documentoCertificaciones">Seleccionar certificaciones (PDF):</label>
-                    <input type="file" name="documentoCertificaciones" id="documentoCertificaciones" accept="application/pdf" {{#if documentos.certificaciones_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoCertificaciones" id="documentoCertificaciones" accept="application/pdf" {{#if documentos.certificaciones_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoCertificaciones">Seleccionar certificaciones</label>
                     <div class="drop-zone" data-for="documentoCertificaciones">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -211,7 +211,7 @@
                 </div>
                 <div>
                     <label for="documentoRecomendaciones">Seleccionar cartas de recomendación (PDF):</label>
-                    <input type="file" name="documentoRecomendaciones" id="documentoRecomendaciones" accept="application/pdf" {{#if documentos.recomendaciones_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoRecomendaciones" id="documentoRecomendaciones" accept="application/pdf" {{#if documentos.recomendaciones_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoRecomendaciones">Seleccionar cartas de recomendación</label>
                     <div class="drop-zone" data-for="documentoRecomendaciones">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -226,7 +226,7 @@
                 </div>
                 <div>
                     <label for="documentoAntecedentes">Seleccionar certificado de antecedentes de la Procuraduría (PDF):</label>
-                    <input type="file" name="documentoAntecedentes" id="documentoAntecedentes" accept="application/pdf" {{#if documentos.antecedentes_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoAntecedentes" id="documentoAntecedentes" accept="application/pdf" {{#if documentos.antecedentes_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoAntecedentes">Seleccionar certificado de antecedentes</label>
                     <div class="drop-zone" data-for="documentoAntecedentes">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -241,7 +241,7 @@
                 </div>
                 <div>
                     <label for="documentoExamenMedico">Seleccionar examen médico (PDF):</label>
-                    <input type="file" name="documentoExamenMedico" id="documentoExamenMedico" accept="application/pdf" {{#if documentos.examen_medico_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoExamenMedico" id="documentoExamenMedico" accept="application/pdf" {{#if documentos.examen_medico_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoExamenMedico">Seleccionar examen médico</label>
                     <div class="drop-zone" data-for="documentoExamenMedico">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -256,7 +256,7 @@
                 </div>
                 <div>
                     <label for="documentoFoto">Seleccionar fotografía reciente (PDF):</label>
-                    <input type="file" name="documentoFoto" id="documentoFoto" accept="application/pdf" {{#if documentos.foto_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoFoto" id="documentoFoto" accept="application/pdf" {{#if documentos.foto_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoFoto">Seleccionar fotografía reciente</label>
                     <div class="drop-zone" data-for="documentoFoto">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -271,7 +271,7 @@
                 </div>
                 <div>
                     <label for="documentoComprobanteDomicilio">Seleccionar comprobante de domicilio (PDF):</label>
-                    <input type="file" name="documentoComprobanteDomicilio" id="documentoComprobanteDomicilio" accept="application/pdf" {{#if documentos.comprobante_domicilio_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoComprobanteDomicilio" id="documentoComprobanteDomicilio" accept="application/pdf" {{#if documentos.comprobante_domicilio_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoComprobanteDomicilio">Seleccionar comprobante de domicilio</label>
                     <div class="drop-zone" data-for="documentoComprobanteDomicilio">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -286,7 +286,7 @@
                 </div>
                 <div>
                     <label for="documentoCesantias">Seleccionar certificado de cesantías (PDF):</label>
-                    <input type="file" name="documentoCesantias" id="documentoCesantias" accept="application/pdf" {{#if documentos.cesantias_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoCesantias" id="documentoCesantias" accept="application/pdf" {{#if documentos.cesantias_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoCesantias">Seleccionar certificado de cesantías</label>
                     <div class="drop-zone" data-for="documentoCesantias">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -301,7 +301,7 @@
                 </div>
                 <div>
                     <label for="documentoHojaVida">Seleccionar hoja de vida (PDF):</label>
-                    <input type="file" name="documentoHojaVida" id="documentoHojaVida" accept="application/pdf" {{#if documentos.hoja_vida_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoHojaVida" id="documentoHojaVida" accept="application/pdf" {{#if documentos.hoja_vida_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoHojaVida">Seleccionar hoja de vida</label>
                     <div class="drop-zone" data-for="documentoHojaVida">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -316,7 +316,7 @@
                 </div>
                 <div>
                     <label for="documentoEPS">Seleccionar certificado de afiliación a la EPS (PDF):</label>
-                    <input type="file" name="documentoEPS" id="documentoEPS" accept="application/pdf" {{#if documentos.eps_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoEPS" id="documentoEPS" accept="application/pdf" {{#if documentos.eps_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoEPS">Seleccionar certificado de afiliación a la EPS</label>
                     <div class="drop-zone" data-for="documentoEPS">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -331,7 +331,7 @@
                 </div>
                 <div>
                     <label for="documentoLibretaMilitar">Seleccionar libreta militar si aplica (PDF):</label>
-                    <input type="file" name="documentoLibretaMilitar" id="documentoLibretaMilitar" accept="application/pdf" {{#if documentos.libreta_militar_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoLibretaMilitar" id="documentoLibretaMilitar" accept="application/pdf" {{#if documentos.libreta_militar_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoLibretaMilitar">Seleccionar libreta militar</label>
                     <div class="drop-zone" data-for="documentoLibretaMilitar">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -346,7 +346,7 @@
                 </div>
                 <div>
                     <label for="documentoContraloria">Seleccionar certificado antecedentes de la Contraloría (PDF):</label>
-                    <input type="file" name="documentoContraloria" id="documentoContraloria" accept="application/pdf" {{#if documentos.contraloria_path}}disabled{{/if}} required>
+                    <input type="file" name="documentoContraloria" id="documentoContraloria" accept="application/pdf" {{#if documentos.contraloria_path}}disabled{{/if}} >
                     <label class="file-label" for="documentoContraloria">Seleccionar certificado de antecedentes de la Contraloría</label>
                     <div class="drop-zone" data-for="documentoContraloria">
                         <p>Arrastra y suelta el documento aquí</p>
@@ -364,6 +364,14 @@
         </form>
     </div>
     <script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        if (input.disabled) {
+            input.removeAttribute('required');
+        }
+    });
+});
+
         function removeFile(inputId) {
             const fileInput = document.getElementById(inputId);
             const dropZone = document.querySelector(`.drop-zone[data-for="${inputId}"]`);

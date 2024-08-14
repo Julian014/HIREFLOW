@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-jghRirIr6ZkPHymB08V4ZyZ8SuTRTBrgeX3RsJj/iqly8KxvQ4H9x8XtRvF3h1oElDnb4AgSvHrFwoC4tb6XKg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Document</title>
+</head>
+<body>
+<style>
+    @import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+    @import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
+
+    .main-menu {
+        background: #132e3e;
+        border-right: 2px solid #90c9a7;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        left: 0;
+        width: 80px;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    .main-menu:hover {
+        width: 250px;
+    }
+
+    .main-menu ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .main-menu li {
+        position: relative;
+        display: block;
+        width: 100%;
+        margin: 20px 0;
+    }
+
+    .main-menu li a {
+        display: flex;
+        align-items: center;
+        color: white;
+        font-size: 20px;
+        text-decoration: none;
+        padding: 10px 20px;
+    }
+
+    .main-menu li a .fa {
+        width: 60px;
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .main-menu li a .nav-text {
+        flex: 1;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        white-space: nowrap;
+    }
+
+    .main-menu:hover li a .nav-text {
+        opacity: 1;
+    }
+
+    .main-menu li:hover a,
+    .main-menu li.active a {
+        background-color: #0056b3;
+        color: #fff;
+    }
+
+    .logout {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+    }
+
+    .main-menu:hover ~ .area {
+        margin-left: 250px;
+    }
+
+    @font-face {
+        font-family: 'Titillium Web';
+        font-style: normal;
+        font-weight: 300;
+        src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        max-width: 90%;
+        margin: 80px auto 20px;
+    }
+
+    .tarjeta {
+        width: 280px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .tarjeta:hover {
+        transform: translateY(-10px);
+    }
+
+    .imagen-circulo {
+        width: 100%;
+        height: 120px;
+        overflow: hidden;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .imagen-circulo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .titulo {
+        font-size: 20px;
+        font-weight: bold;
+        padding: 15px 10px;
+        text-align: center;
+    }
+
+    .cuerpo {
+        padding: 15px 10px;
+    }
+
+    .cuerpo a {
+        display: block;
+        padding: 8px 0;
+        text-decoration: none;
+        color: #333;
+        text-align: center;
+        border-top: 1px solid #ccc;
+        transition: color 0.3s;
+    }
+
+    .cuerpo a:hover {
+        color: #009688; /* Color de hover deseado */
+    }
+
+    .pie {
+        background: #132e3e;
+        border-radius: 0 0 15px 15px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .pie a {
+        text-decoration: none;
+        color: white;
+    }
+
+    .opera {
+        left: 10%;
+        align-items: center;
+        border-radius: 20px;
+        position: relative;
+        width: 20%;
+        padding: 5px;
+        background-color: #90c9a7;
+        text-align: center;
+    }
+
+    .opera h1 {
+        color: #132e3e;
+    }
+</style>
+
+<div class="area"></div>
+<nav class="main-menu">
+    <ul>
+        <br>
+        <li>
+            <a href="/">
+                <i class="fa fa-home fa-2x"></i>
+                <span class="nav-text">Menu Principal</span>
+            </a>
+        </li>
+        <br><br>
+        {{#if administrativo}}
+        <li>
+            <a href="/menuempresa">
+                <i class="fa fa-building-o fa-2x"></i>
+                <span class="nav-text">Menú Empresa</span>
+            </a>
+        </li>
+        {{/if}}
+        <br><br>
+        <li class="has-subnav">
+            <a href="/menuempleados">
+                <i class="fa fa-user fa-2x"></i>
+                <span class="nav-text">Menu Empleados</span>
+            </a>
+        </li>
+        <br><br>
+        <li class="has-subnav">
+            <a href="#">
+                <i class="fa fa-wrench fa-2x"></i>
+                <span id="texx" class="nav-text">Soporte</span>
+            </a>
+        </li>
+        <br><br>
+        {{#if administrativo}}
+        <li class="has-subnav">
+            <a href="#">
+                <i class="fa fa-cogs fa-2x"></i>
+                <span class="nav-text">Configuracion</span>
+            </a>
+        </li>
+        {{/if}}
+    </ul>
+    <ul class="logout">
+        <li>
+            <a href="/logout">
+                <i class="fa fa-power-off fa-2x"></i>
+                <span class="nav-text">Logout</span>
+            </a>
+        </li>  
+    </ul>
+</nav>
+
+<br><br><br>
+<div class="opera">
+    <h1>MENU ADMINISTRATIVO</h1>
+</div>
+
+<div class="menu">
+    <div class="tarjeta">
+        <div class="imagen-circulo">
+            <img src="imagenes/Why do employees stay with a company (blog.jpg" alt="Imagen de la tarjeta">
+        </div>
+        <div class="titulo">EMPLEADOS</div>
+        <div class="cuerpo">
+            <a href="/nuevoUsuario">NUEVO EMPLEADO</a>
+            <a href="">CONSULTAR</a>
+        </div>
+        <div class="pie">
+            <a href="#">Más información</a>
+        </div>
+    </div>
+    <br><br>
+
+    <div class="tarjeta">
+        <div class="imagen-circulo">
+            <img src="imagenes/documentos-organizacion-adultos-jovenes-1024x683.jpg" alt="Imagen de la tarjeta">
+        </div>
+        <div class="titulo">DOCUMENTACION</div>
+        <div class="cuerpo">
+            <a href="/validacion">VERIFICACION</a>
+            <a href="/consultar_servicioT">CONSULTA</a>
+        </div>
+        <div class="pie">
+            <a href="#">Más información</a>
+        </div>
+    </div>
+    <br><br>
+
+    <div class="tarjeta">
+        <div class="imagen-circulo">
+            <img src="imagenes/images.jpeg" alt="Imagen de la tarjeta">
+        </div>
+        <div class="titulo">CONTRATO</div>
+        <div class="cuerpo">
+            <a href="/enviar_contrato">ENVIAR</a>
+            <a href="">CONSULTAR</a>
+        </div>
+        <div class="pie">
+            <a href="#">Más información</a>
+        </div>
+    </div>
+    <br><br>
+
+
+
+    <div class="tarjeta">
+        <div class="imagen-circulo">
+            <img src="imagenes/examenes-medicos-salud.png" alt="Imagen de la tarjeta">
+        </div>
+        <div class="titulo">INCAPACIDADES</div>
+        <div class="cuerpo">
+            <a href="/agregar-vehiculo">AGREGAR</a>
+            <a href="/agregar-vehiculo">CONSULTA INDIVIDUAL</a>
+            <a href="/agregar-vehiculo">CONSULTA GENERAL</a>
+        </div>
+        <div class="pie">
+            <a href="#">Más información</a>
+        </div>
+    </div>
+    <br><br>
+
+    <div class="tarjeta">
+        <div class="imagen-circulo">
+            <img src="imagenes/images (1).jpeg" alt="Imagen de la tarjeta">
+        </div>
+        <div class="titulo">OTROS DOCUMENTOS</div>
+        <div class="cuerpo">
+            <a href="/agregar-conductor">AGREGAR</a>
+            <a href="/consulta-conductores2">CONSULTA INDIVIDUAL</a>
+            <a href="/consulta-conductores2">CONSULTA GENERAL</a>
+        </div>
+        <div class="pie">
+            <a href="#">Más información</a>
+        </div>
+    </div>
+    <br><br>
+
+    <div class="tarjeta">
+        <div class="imagen-circulo">
+            <img src="imagenes/images (2).jpeg" alt="Imagen de la tarjeta">
+        </div>
+        <div class="titulo">EVALUACION DE DESEMPEÑO</div>
+        <div class="cuerpo">
+            <a href="/agregar-conductor">AGREGAR</a>
+            <a href="">CONSULTAR INDIVIDUAL</a>
+            <a href="">CONSULTA GENERAL</a>
+        </div>
+        <div class="pie">
+            <a href="#">Más información</a>
+        </div>
+    </div>
+    <br><br>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', verificarNotificacionesPendientes);
+
+        async function verificarNotificacionesPendientes() {
+            try {
+                const response = await fetch('/verificar-notificaciones');
+                const data = await response.json();
+                if (data.notificacionesPendientes !== undefined) {
+                    const numNotificacionesSinLeer = document.getElementById('numNotificacionesSinLeer');
+                    numNotificacionesSinLeer.innerText = data.notificacionesPendientes;
+                }
+            } catch (error) {
+                console.error('Error al verificar las notificaciones pendientes:', error);
+            }
+        }
+
+        async function mostrarNotificaciones(nombreUsuario) {
+            const contenedorNotificaciones = document.getElementById('ventanaEmergente');
+            contenedorNotificaciones.style.display = 'block';
+
+            try {
+                const response = await fetch(`/notificaciones-pendientes/${nombreUsuario}`);
+                const data = await response.json();
+                const notificacionesContainer = document.getElementById('notificacionesContainer');
+                notificacionesContainer.innerHTML = '';
+
+                if (data && Array.isArray(data)) {
+                    data.forEach(notificacion => {
+                        const notificacionElement = document.createElement('div');
+                        notificacionElement.classList.add('notificacion');
+                        notificacionElement.dataset.id = notificacion._id;
+                        notificacionElement.innerHTML = `
+                            <span class="mensaje">${notificacion.mensaje}</span>
+                            <button class="marcarLeida" onclick="marcarComoLeida('${notificacion._id}')">Marcar como leída</button>
+                            <button class="eliminar" onclick="eliminarNotificacion('${notificacion._id}', this)">Eliminar</button>
+                        `;
+                        notificacionesContainer.appendChild(notificacionElement);
+                    });
+                } else {
+                    console.error('Error: Unexpected data structure for notifications');
+                }
+            } catch (error) {
+                console.error('Error al cargar las notificaciones:', error);
+            }
+        }
+
+        function cerrarVentanaEmergente() {
+            const ventanaEmergente = document.getElementById('ventanaEmergente');
+            ventanaEmergente.style.display = 'none';
+        }
+
+        async function marcarComoLeida(id) {
+            try {
+                const response = await fetch(`/marcar-notificacion/${id}`, { method: 'PUT' });
+                if (response.ok) {
+                    // Actualizar la interfaz de usuario según sea necesario
+                } else {
+                    console.error('Error al marcar la notificación como leída');
+                }
+            } catch (error) {
+                console.error('Error al marcar la notificación como leída:', error);
+            }
+        }
+
+        async function eliminarNotificacion(id, boton) {
+            try {
+                const response = await fetch(`/eliminar-notificacion/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    const notificacion = boton.parentNode;
+                    notificacion.parentNode.removeChild(notificacion);
+                    const numNotificacionesSinLeer = document.getElementById('numNotificacionesSinLeer');
+                    numNotificacionesSinLeer.innerText = parseInt(numNotificacionesSinLeer.innerText) - 1;
+                } else {
+                    console.error('Error al eliminar la notificación');
+                }
+            } catch (error) {
+                console.error('Error al eliminar la notificación:', error);
+            }
+        }
+
+        setInterval(reproducirSonido, 5000);
+
+        function reproducirSonido() {
+            const audio = document.getElementById('notificationSound');
+            audio.play();
+        }
+    </script>
+</body>
+</html>
