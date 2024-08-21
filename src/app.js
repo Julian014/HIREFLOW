@@ -819,7 +819,6 @@ const adjustPath = (path) => {
 };
 
 
-// Ruta para manejar la subida de documentos
 app.post("/subirdocumentos", uploadDocumentos.fields([
     { name: 'documentoCedula' }, 
     { name: 'documentoContratacion' }, 
@@ -843,7 +842,6 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
 
         // Obtener las rutas de los archivos subidos, si existen, y ajustar las rutas
         const documentoCedulaPath = adjustPath(req.files.documentoCedula ? req.files.documentoCedula[0].path : null);
-        console.log('Adjusted Cedula Path:', documentoCedulaPath);
         const documentoContratacionPath = adjustPath(req.files.documentoContratacion ? req.files.documentoContratacion[0].path : null);
         const documentoTituloPath = adjustPath(req.files.documentoTitulo ? req.files.documentoTitulo[0].path : null);
         const documentoTituloBachillerPath = adjustPath(req.files.documentoTituloBachiller ? req.files.documentoTituloBachiller[0].path : null);
@@ -865,47 +863,68 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
             const [results] = await connection.query(query, [nombreUsuario]);
 
             if (results.length > 0) {
-                // Actualizar documentos existentes
+                // Actualizar documentos existentes y restablecer los campos de validación a NULL para permitir nueva validación
                 const updateDocumentQuery = `
                     UPDATE documentos SET
                     cedula_path = COALESCE(?, cedula_path),
+                    cedula_validado = IF(?, NULL, cedula_validado),
                     contratacion_path = COALESCE(?, contratacion_path),
+                    contratacion_validado = IF(?, NULL, contratacion_validado),
                     titulo_path = COALESCE(?, titulo_path),
+                    titulo_validado = IF(?, NULL, titulo_validado),
                     titulo_bachiller_path = COALESCE(?, titulo_bachiller_path),
+                    titulo_bachiller_validado = IF(?, NULL, titulo_bachiller_validado),
                     certificaciones_path = COALESCE(?, certificaciones_path),
+                    certificaciones_validado = IF(?, NULL, certificaciones_validado),
                     recomendaciones_path = COALESCE(?, recomendaciones_path),
+                    recomendaciones_validado = IF(?, NULL, recomendaciones_validado),
                     antecedentes_path = COALESCE(?, antecedentes_path),
+                    antecedentes_validado = IF(?, NULL, antecedentes_validado),
                     examen_medico_path = COALESCE(?, examen_medico_path),
+                    examen_medico_validado = IF(?, NULL, examen_medico_validado),
                     foto_path = COALESCE(?, foto_path),
+                    foto_validado = IF(?, NULL, foto_validado),
                     comprobante_domicilio_path = COALESCE(?, comprobante_domicilio_path),
+                    comprobante_domicilio_validado = IF(?, NULL, comprobante_domicilio_validado),
                     cesantias_path = COALESCE(?, cesantias_path),
+                    cesantias_validado = IF(?, NULL, cesantias_validado),
                     hoja_vida_path = COALESCE(?, hoja_vida_path),
+                    hoja_vida_validado = IF(?, NULL, hoja_vida_validado),
                     eps_path = COALESCE(?, eps_path),
+                    eps_validado = IF(?, NULL, eps_validado),
                     libreta_militar_path = COALESCE(?, libreta_militar_path),
-                    contraloria_path = COALESCE(?, contraloria_path)
+                    libreta_militar_validado = IF(?, NULL, libreta_militar_validado),
+                    contraloria_path = COALESCE(?, contraloria_path),
+                    contraloria_validado = IF(?, NULL, contraloria_validado)
                     WHERE usuario = ?`;
+
                 await connection.query(updateDocumentQuery, [
-                    documentoCedulaPath,
-                    documentoContratacionPath,
-                    documentoTituloPath,
-                    documentoTituloBachillerPath,
-                    documentoCertificacionesPath,
-                    documentoRecomendacionesPath,
-                    documentoAntecedentesPath,
-                    documentoExamenMedicoPath,
-                    documentoFotoPath,
-                    documentoComprobanteDomicilioPath,
-                    documentoCesantiasPath,
-                    documentoHojaVidaPath,
-                    documentoEPSPath,
-                    documentoLibretaMilitarPath,
-                    documentoContraloriaPath,
+                    documentoCedulaPath, documentoCedulaPath !== null,
+                    documentoContratacionPath, documentoContratacionPath !== null,
+                    documentoTituloPath, documentoTituloPath !== null,
+                    documentoTituloBachillerPath, documentoTituloBachillerPath !== null,
+                    documentoCertificacionesPath, documentoCertificacionesPath !== null,
+                    documentoRecomendacionesPath, documentoRecomendacionesPath !== null,
+                    documentoAntecedentesPath, documentoAntecedentesPath !== null,
+                    documentoExamenMedicoPath, documentoExamenMedicoPath !== null,
+                    documentoFotoPath, documentoFotoPath !== null,
+                    documentoComprobanteDomicilioPath, documentoComprobanteDomicilioPath !== null,
+                    documentoCesantiasPath, documentoCesantiasPath !== null,
+                    documentoHojaVidaPath, documentoHojaVidaPath !== null,
+                    documentoEPSPath, documentoEPSPath !== null,
+                    documentoLibretaMilitarPath, documentoLibretaMilitarPath !== null,
+                    documentoContraloriaPath, documentoContraloriaPath !== null,
                     nombreUsuario
                 ]);
                 res.send('Archivos actualizados exitosamente.');
             } else {
                 // Insertar nuevos documentos
-                const insertDocumentQuery = 'INSERT INTO documentos (usuario, cedula_path, contratacion_path, titulo_path, titulo_bachiller_path, certificaciones_path, recomendaciones_path, antecedentes_path, examen_medico_path, foto_path, comprobante_domicilio_path, cesantias_path, hoja_vida_path, eps_path, libreta_militar_path, contraloria_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                const insertDocumentQuery = `
+                    INSERT INTO documentos (
+                        usuario, cedula_path, contratacion_path, titulo_path, titulo_bachiller_path, certificaciones_path, recomendaciones_path, antecedentes_path, 
+                        examen_medico_path, foto_path, comprobante_domicilio_path, cesantias_path, hoja_vida_path, eps_path, libreta_militar_path, contraloria_path
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
                 await connection.query(insertDocumentQuery, [
                     nombreUsuario,
                     documentoCedulaPath,
@@ -934,7 +953,6 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
         res.redirect("/login");
     }
 });
-
 
 
 
