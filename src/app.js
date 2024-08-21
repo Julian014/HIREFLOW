@@ -980,11 +980,15 @@ app.get('/validacion', async (req, res) => {
 
 
 
+
+
+
 app.post('/validardocumentos', async (req, res) => {
     const data = req.body;
     const updates = [];
+    const rejectedDocuments = [];
 
-    // Mapping of document types to their respective columns
+    // Mapeo de tipos de documentos a sus respectivas columnas en la base de datos
     const documentColumnMap = {
         cedula: 'cedula_validado',
         contratacion: 'contratacion_validado',
@@ -1003,42 +1007,64 @@ app.post('/validardocumentos', async (req, res) => {
         contraloria: 'contraloria_validado'
     };
 
-    console.log('Received data:', data);
-
     for (const [key, value] of Object.entries(data)) {
         const [usuario, ...documentoParts] = key.split('_');
         const documento = documentoParts.join('_');
-        const validado = value === 'si' ? 1 : 0;
         const column = documentColumnMap[documento];
 
         if (column) {
+            const validado = value === 'si' ? 1 : 0;
             updates.push({ validado, usuario, column });
-        } else {
-            console.warn(`Column not found for documento: ${documento}`);
+
+            if (validado === 0) {
+                const razon = data[`${usuario}_${documento}_razon`] || 'No especificada';
+                rejectedDocuments.push({ usuario, documento, razon });
+            }
         }
     }
 
     try {
+        // Actualizar la base de datos
         for (const update of updates) {
             const sql = `UPDATE documentos SET ${update.column} = ? WHERE usuario = ?`;
-            console.log(`Executing SQL: ${sql} with values: [${update.validado}, ${update.usuario}]`);
             await req.db.query(sql, [update.validado, update.usuario]);
         }
-        res.send('Validaciones guardadas correctamente');
+
+        // Enviar correos electrónicos a los empleados con documentos rechazados
+        for (const rejection of rejectedDocuments) {
+            const [rows] = await req.db.query('SELECT email FROM empleados WHERE nombre = ?', [rejection.usuario]);
+            const email = rows.length ? rows[0].email : null;
+
+            if (email) {
+                await enviarCorreoRechazo(email, rejection.documento, rejection.razon);
+            }
+        }
+
+        res.redirect('/validacion');
     } catch (error) {
-        console.error('Error executing update:', error);
+        console.error('Error al guardar las validaciones:', error);
         res.status(500).send('Ocurrió un error al guardar las validaciones');
     }
 });
 
+async function enviarCorreoRechazo(email, documento, razon) {
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: 'nexus.innovationss@gmail.com',
+            pass: 'dhmtnkcehxzfwzbd'
+        }
+    });
 
+    const mensaje = {
+        from: 'nexus.innovationss@gmail.com',
+        to: email,
+        subject: 'Documento Rechazado',
+        text: `El documento ${documento} no fue aceptado por la siguiente razón: ${razon}. Por favor, vuelve a subirlo.`
+    };
 
-
-
-
-
-
-
+    await transporter.sendMail(mensaje);
+}
 
 
 
