@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validar Documentos</title>
-    <style>
+   <style>
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -119,6 +119,15 @@
         select:focus,
         .search-box:focus {
             border-color: rgb(43, 58, 103);
+        }
+
+        .back-button {
+            background-color: #f44336;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #d32f2f;
         }
     </style>
     <script>
@@ -358,6 +367,8 @@
             </div>
             {{/each}}
             <button type="submit">Guardar Validaciones</button>
+                    <a href="/" class="back-button">Volver al menu</a>
+
         </form>
 
     </main>
