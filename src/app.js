@@ -978,47 +978,42 @@ app.get('/validacion', async (req, res) => {
 });
 
 
-
-
-
-
-
 app.post('/validardocumentos', async (req, res) => {
     const data = req.body;
     const updates = [];
     const rejectedDocuments = [];
 
-    // Mapeo de tipos de documentos a sus respectivas columnas en la base de datos
+    // Mapeo de tipos de documentos a sus respectivas columnas y rutas de archivos
     const documentColumnMap = {
-        cedula: 'cedula_validado',
-        contratacion: 'contratacion_validado',
-        titulo: 'titulo_validado',
-        titulo_bachiller: 'titulo_bachiller_validado',
-        certificaciones: 'certificaciones_validado',
-        recomendaciones: 'recomendaciones_validado',
-        antecedentes: 'antecedentes_validado',
-        examen_medico: 'examen_medico_validado',
-        foto: 'foto_validado',
-        comprobante_domicilio: 'comprobante_domicilio_validado',
-        cesantias: 'cesantias_validado',
-        hoja_vida: 'hoja_vida_validado',
-        eps: 'eps_validado',
-        libreta_militar: 'libreta_militar_validado',
-        contraloria: 'contraloria_validado'
+        cedula: { column: 'cedula_validado', pathColumn: 'cedula_path' },
+        contratacion: { column: 'contratacion_validado', pathColumn: 'contratacion_path' },
+        titulo: { column: 'titulo_validado', pathColumn: 'titulo_path' },
+        titulo_bachiller: { column: 'titulo_bachiller_validado', pathColumn: 'titulo_bachiller_path' },
+        certificaciones: { column: 'certificaciones_validado', pathColumn: 'certificaciones_path' },
+        recomendaciones: { column: 'recomendaciones_validado', pathColumn: 'recomendaciones_path' },
+        antecedentes: { column: 'antecedentes_validado', pathColumn: 'antecedentes_path' },
+        examen_medico: { column: 'examen_medico_validado', pathColumn: 'examen_medico_path' },
+        foto: { column: 'foto_validado', pathColumn: 'foto_path' },
+        comprobante_domicilio: { column: 'comprobante_domicilio_validado', pathColumn: 'comprobante_domicilio_path' },
+        cesantias: { column: 'cesantias_validado', pathColumn: 'cesantias_path' },
+        hoja_vida: { column: 'hoja_vida_validado', pathColumn: 'hoja_vida_path' },
+        eps: { column: 'eps_validado', pathColumn: 'eps_path' },
+        libreta_militar: { column: 'libreta_militar_validado', pathColumn: 'libreta_militar_path' },
+        contraloria: { column: 'contraloria_validado', pathColumn: 'contraloria_path' }
     };
 
     for (const [key, value] of Object.entries(data)) {
         const [usuario, ...documentoParts] = key.split('_');
         const documento = documentoParts.join('_');
-        const column = documentColumnMap[documento];
+        const docInfo = documentColumnMap[documento];
 
-        if (column) {
+        if (docInfo) {
             const validado = value === 'si' ? 1 : 0;
-            updates.push({ validado, usuario, column });
+            updates.push({ validado, usuario, column: docInfo.column });
 
             if (validado === 0) {
                 const razon = data[`${usuario}_${documento}_razon`] || 'No especificada';
-                rejectedDocuments.push({ usuario, documento, razon });
+                rejectedDocuments.push({ usuario, documento, razon, pathColumn: docInfo.pathColumn });
             }
         }
     }
@@ -1030,10 +1025,27 @@ app.post('/validardocumentos', async (req, res) => {
             await req.db.query(sql, [update.validado, update.usuario]);
         }
 
-        // Enviar correos electrónicos a los empleados con documentos rechazados
+        // Manejar documentos rechazados
         for (const rejection of rejectedDocuments) {
-            const [rows] = await req.db.query('SELECT email FROM empleados WHERE nombre = ?', [rejection.usuario]);
-            const email = rows.length ? rows[0].email : null;
+            // Obtener la ruta del archivo del documento
+            const [docRows] = await req.db.query(`SELECT ?? FROM documentos WHERE usuario = ?`, [rejection.pathColumn, rejection.usuario]);
+            const documentPath = docRows.length ? docRows[0][rejection.pathColumn] : null;
+
+            // Obtener el email del empleado usando el nombre del usuario
+            const [empRows] = await req.db.query('SELECT email FROM empleados WHERE nombre = ?', [rejection.usuario]);
+            const email = empRows.length ? empRows[0].email : null;
+
+            if (documentPath) {
+                // Eliminar el archivo del documento
+                const fullPath = path.join(__dirname, documentPath);
+                fs.unlink(fullPath, (err) => {
+                    if (err) console.error(`Error al eliminar el archivo: ${err}`);
+                });
+
+                // Limpiar la ruta en la base de datos
+                const updatePathSQL = `UPDATE documentos SET ${rejection.pathColumn} = NULL WHERE usuario = ?`;
+                await req.db.query(updatePathSQL, [rejection.usuario]);
+            }
 
             if (email) {
                 await enviarCorreoRechazo(email, rejection.documento, rejection.razon);
@@ -1065,6 +1077,7 @@ async function enviarCorreoRechazo(email, documento, razon) {
 
     await transporter.sendMail(mensaje);
 }
+
 
 
 
