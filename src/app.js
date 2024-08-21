@@ -843,6 +843,7 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
 
         // Obtener las rutas de los archivos subidos, si existen, y ajustar las rutas
         const documentoCedulaPath = adjustPath(req.files.documentoCedula ? req.files.documentoCedula[0].path : null);
+        console.log('Adjusted Cedula Path:', documentoCedulaPath);
         const documentoContratacionPath = adjustPath(req.files.documentoContratacion ? req.files.documentoContratacion[0].path : null);
         const documentoTituloPath = adjustPath(req.files.documentoTitulo ? req.files.documentoTitulo[0].path : null);
         const documentoTituloBachillerPath = adjustPath(req.files.documentoTituloBachiller ? req.files.documentoTituloBachiller[0].path : null);
@@ -1090,22 +1091,110 @@ app.get('/enviar_contrato', async (req, res) => {
 
 
 
+
+
+
 app.get('/modificar_contrato/:usuario', async (req, res) => {
     const { usuario } = req.params;
-    res.render('EMPLEADOS/contrato/modificar_contrato', { usuario });
+
+    try {
+        // Obtener detalles del empleado incluyendo tipo y documento
+        const [empleadoResult] = await pool.query('SELECT nombre, apellido, tipo, documento FROM empleados WHERE nombre = ?', [usuario]);
+        if (empleadoResult.length === 0) {
+            return res.status(404).send('Empleado no encontrado');
+        }
+        const empleado = empleadoResult[0];
+
+        res.render('EMPLEADOS/contrato/modificar_contrato', {
+            usuario,
+            empleado,
+            tiposContrato: ['TERMINO INDEFINIDO', 'TERMINO FIJO', 'OBRA LABOR', 'PRESTACION DE SERVICIO']
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los detalles del empleado');
+    }
 });
 
 
 
-
-
+const plantillasContratos = {
+    "TERMINO INDEFINIDO": (empleado, datosContrato) => `
+        <div class="page">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold;">CONTRATO DE TRABAJO - TERMINO INDEFINIDO</h1>
+            <p style="text-align: center; font-size: 16px;">Entre [Nombre de la Empresa] y ${empleado.nombre} ${empleado.apellido}</p>
+            <p style="font-size: 14px; text-align: justify;">
+                Tipo: ${empleado.tipo}<br>
+                Documento: ${empleado.documento}<br>
+                Este contrato de trabajo se celebra en <strong>${datosContrato.ciudad}</strong>, <strong>${datosContrato.pais}</strong>, el <strong>${datosContrato.fecha}</strong> entre:
+            </p>
+            <p style="font-size: 14px; text-align: justify;">
+                Las partes acuerdan un contrato a término indefinido, el cual podrá ser terminado en cualquier momento con el debido preaviso.
+            </p>
+        </div>
+    `,
+    "TERMINO FIJO": (empleado, datosContrato) => `
+        <div class="page">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold;">CONTRATO DE TRABAJO - TERMINO FIJO</h1>
+            <p style="text-align: center; font-size: 16px;">Entre [Nombre de la Empresa] y ${empleado.nombre} ${empleado.apellido}</p>
+            <p style="font-size: 14px; text-align: justify;">
+                Tipo: ${empleado.tipo}<br>
+                Documento: ${empleado.documento}<br>
+                Este contrato de trabajo se celebra en <strong>${datosContrato.ciudad}</strong>, <strong>${datosContrato.pais}</strong>, el <strong>${datosContrato.fecha}</strong> entre:
+            </p>
+            <p style="font-size: 14px; text-align: justify;">
+                Las partes acuerdan un contrato a término fijo de ${datosContrato.duracion_contrato} meses, con posibilidad de renovación.
+            </p>
+        </div>
+    `,
+    "OBRA LABOR": (empleado, datosContrato) => `
+        <div class="page">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold;">CONTRATO DE TRABAJO - OBRA LABOR</h1>
+            <p style="text-align: center; font-size: 16px;">Entre [Nombre de la Empresa] y ${empleado.nombre} ${empleado.apellido}</p>
+            <p style="font-size: 14px; text-align: justify;">
+                Tipo: ${empleado.tipo}<br>
+                Documento: ${empleado.documento}<br>
+                Este contrato de trabajo se celebra en <strong>${datosContrato.ciudad}</strong>, <strong>${datosContrato.pais}</strong>, el <strong>${datosContrato.fecha}</strong> entre:
+            </p>
+            <p style="font-size: 14px; text-align: justify;">
+                Las partes acuerdan un contrato por obra o labor específica. El contrato terminará una vez se complete la labor para la cual fue contratado el empleado.
+            </p>
+        </div>
+    `,
+    "PRESTACION DE SERVICIO": (empleado, datosContrato) => `
+        <div class="page">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold;">CONTRATO DE PRESTACIÓN DE SERVICIOS</h1>
+            <p style="text-align: center; font-size: 16px;">Entre [Nombre de la Empresa] y ${empleado.nombre} ${empleado.apellido}</p>
+            <p style="font-size: 14px; text-align: justify;">
+                Tipo: ${empleado.tipo}<br>
+                Documento: ${empleado.documento}<br>
+                Este contrato de prestación de servicios se celebra en <strong>${datosContrato.ciudad}</strong>, <strong>${datosContrato.pais}</strong>, el <strong>${datosContrato.fecha}</strong> entre:
+            </p>
+            <p style="font-size: 14px; text-align: justify;">
+                El contratista se compromete a realizar los servicios descritos en este documento de acuerdo con las condiciones acordadas.
+            </p>
+        </div>
+    `
+};
 
 
 
 
 app.post('/generar_contrato', async (req, res) => {
-    const { usuario, ciudad, pais, fecha, cargo_empleado, duracion_contrato, fecha_inicio, fecha_terminacion, horas_trabajo, dia_inicio, dia_fin, horario_trabajo, monto_salario, moneda, periodicidad_pago, dia_pago } = req.body;
-    
+    const {
+        usuario,
+        tipo_contrato,
+        tipo,
+        documento,
+        nombre,
+        apellido,
+        salario,
+        duracion_contrato,
+        ciudad = "Bogota D.C.",
+        pais = "Colombia",
+        fecha = new Date().toLocaleDateString('es-ES')
+    } = req.body;
+
     try {
         // Obtener el email del usuario desde la tabla 'user'
         const [userResult] = await pool.query('SELECT email FROM user WHERE name = ?', [usuario]);
@@ -1113,130 +1202,44 @@ app.post('/generar_contrato', async (req, res) => {
             return res.status(404).send('Usuario no encontrado');
         }
         const email = userResult[0].email;
-        
-        // Obtener los detalles del empleado desde la tabla 'empleados' usando el email
-        const [empleadoResult] = await pool.query('SELECT nombre, apellido, email, telefono, direccion, fechaNacimiento, rol, tipo, documento, sexo, tipo_sangre, estado_civil, emergencia_nombre, emergencia_telefono FROM empleados WHERE email = ?', [email]);
-        if (empleadoResult.length === 0) {
-            return res.status(404).send('Empleado no encontrado');
-        }
-        const empleado = empleadoResult[0];
-        
-        // Contenido del contrato
-        const contenido = `
-            <div class="page">
-                <h1 style="text-align: center; font-size: 24px; font-weight: bold;">CONTRATO DE TRABAJO</h1>
-                <p style="text-align: center; font-size: 16px;">Entre [Nombre de la Empresa] y ${empleado.nombre} ${empleado.apellido}</p>
-                <p style="font-size: 14px; text-align: justify;">
-                    Este contrato de trabajo se celebra en <strong>${ciudad}</strong>, <strong>${pais}</strong>, el <strong>${fecha}</strong> entre:
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Partes</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    <strong>La Empresa:</strong> <span>[Nombre de la Empresa]</span>, con domicilio en <span>[Dirección de la Empresa]</span>, representada en este acto por <span>[Nombre del Representante]</span>, en su calidad de <span>[Cargo del Representante]</span>.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                <p style="font-size: 14px; text-align: justify;">
-                    <strong>El Empleado:</strong> ${empleado.nombre} ${empleado.apellido}, identificado con cédula de ciudadanía número ${empleado.documento}, con domicilio en ${empleado.direccion}.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Objeto del Contrato</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    La Empresa contrata al Empleado para desempeñar las funciones de ${cargo_empleado}, de acuerdo con las condiciones y términos establecidos en este contrato.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Duración</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    Este contrato tendrá una duración de ${duracion_contrato}, comenzando el ${fecha_inicio} y terminando el ${fecha_terminacion}, pudiendo ser renovado por acuerdo mutuo entre las partes.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Jornada Laboral</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    El Empleado cumplirá una jornada laboral de ${horas_trabajo} horas semanales, de ${dia_inicio} a ${dia_fin}, con un horario de ${horario_trabajo}.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Remuneración</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    La Empresa pagará al Empleado un salario de ${monto_salario} ${moneda}, que se abonará de forma ${periodicidad_pago}, el ${dia_pago} de cada mes.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-            </div>
 
-            <div class="page">
-                <h2 style="font-size: 18px; font-weight: bold;">Obligaciones del Empleado</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    El Empleado se compromete a cumplir con las siguientes obligaciones:
-                    <ul style="list-style-type: disc; margin-left: 20px;">
-                        <li>Desempeñar sus funciones con diligencia y eficiencia.</li>
-                        <li>Respetar las políticas y procedimientos de la Empresa.</li>
-                        <li>Guardar confidencialidad sobre la información de la Empresa.</li>
-                        <li>Informar cualquier irregularidad o problema relacionado con su trabajo.</li>
-                    </ul>
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Obligaciones de la Empresa</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    La Empresa se compromete a cumplir con las siguientes obligaciones:
-                    <ul style="list-style-type: disc; margin-left: 20px;">
-                        <li>Pagar la remuneración acordada en tiempo y forma.</li>
-                        <li>Proporcionar un entorno de trabajo seguro y saludable.</li>
-                        <li>Ofrecer las herramientas y recursos necesarios para el desempeño del trabajo.</li>
-                        <li>Respetar los derechos laborales del Empleado.</li>
-                    </ul>
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Terminación del Contrato</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    Este contrato podrá ser terminado por cualquiera de las partes, con un preaviso de ${duracion_contrato} días, o de forma inmediata por causa justificada, según lo establecido en la legislación laboral vigente.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <h2 style="font-size: 18px; font-weight: bold;">Firma</h2>
-                <p style="font-size: 14px; text-align: justify;">
-                    En señal de conformidad, las partes firman el presente contrato en dos ejemplares de igual tenor y a un solo efecto, en el lugar y fecha indicados al inicio.
-                    <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div>
-                </p>
-                
-                <div style="margin-top: 50px; display: flex; justify-content: space-between;">
-                    <p style="text-align: center; width: 45%;">
-                        <img src="[Firma del Representante]" alt="Firma del Representante" style="width: 150px; height: auto;"><br>
-                        _______________________________<br>
-                        <strong>[Nombre del Representante]</strong><br>
-                        Representante de la Empresa
-                    </p>
-                    
-                    <p style="text-align: center; width: 45%;">
-                        <div class="signature-placeholder" onclick="insertSignature(this)">Firmar Aquí</div><br>
-                        _______________________________<br>
-                        <strong>${empleado.nombre} ${empleado.apellido}</strong><br>
-                        Empleado
-                    </p>
-                </div>
-            </div>
-        `;
-        
+        // Datos del empleado
+        const empleado = { tipo, documento, nombre, apellido };
+
+        // Datos adicionales del contrato
+        const datosContrato = { salario, duracion_contrato, ciudad, pais, fecha };
+
+        // Seleccionar la plantilla correcta según el tipo de contrato
+        const contenido = plantillasContratos[tipo_contrato](empleado, datosContrato);
+
+        // Guardar el contrato en la base de datos
         const query = `
-            INSERT INTO contratos (usuario, contenido) VALUES (?, ?)
+            INSERT INTO contratos (usuario, contenido, tipo_contrato, salario, duracion_contrato) 
+            VALUES (?, ?, ?, ?, ?)
         `;
-        await pool.query(query, [usuario, contenido]);
-        res.send('Contrato generado correctamente');
+        await pool.query(query, [usuario, contenido, tipo_contrato, salario, duracion_contrato]);
+
+        // Enviar un correo electrónico al empleado
+        const mailOptions = {
+            from: 'nexus.innovationss@gmail.com',
+            to: email,
+            subject: 'Contrato de Trabajo Enviado',
+            html: `
+                <p>Hola <strong>${nombre}</strong>,</p>
+                <p>Tu contrato de trabajo de tipo <strong>${tipo_contrato}</strong> ha sido enviado a través de nuestra plataforma.</p>
+                <p>Por favor, <a href="http://tu-plataforma.com">ingresa a la plataforma</a> para revisar y firmar el contrato.</p>
+                <p>Saludos,<br>[Nombre de la Empresa]</p>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.send('Contrato generado y correo enviado correctamente');
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error al generar el contrato');
+        res.status(500).send('Error al generar el contrato o enviar el correo');
     }
 });
-
-
-
-
-
-
-
 
 
 
@@ -1259,9 +1262,8 @@ app.get('/ver_contrato', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         try {
-            // Verificar si el usuario ya ha firmado el contrato
             const [firmaResult] = await pool.query('SELECT firma_empleado FROM contratos WHERE usuario = ?', [nombreUsuario]);
-            
+
             if (firmaResult.length > 0 && firmaResult[0].firma_empleado) {
                 res.send(`
                     <script>
@@ -1270,7 +1272,6 @@ app.get('/ver_contrato', async (req, res) => {
                     </script>
                 `);
             } else {
-                // Obtener el contenido del contrato
                 const [contratoResult] = await pool.query('SELECT contenido FROM contratos WHERE usuario = ?', [nombreUsuario]);
                 if (contratoResult.length > 0) {
                     res.render('EMPLEADOS/contrato/ver_contrato', { contrato: contratoResult[0].contenido, usuario: nombreUsuario });
@@ -1318,6 +1319,7 @@ app.get('/ver_contrato_firmado/:usuario', async (req, res) => {
         res.status(500).send('Error al cargar el contrato');
     }
 });
+
 
 app.post('/guardar_contrato', async (req, res) => {
     const { usuario, contrato } = req.body;
@@ -1410,6 +1412,70 @@ function getVerificationStatus(status) {
     if (status === '0') return 'Rechazado';
     return 'Pendiente';
 }
+
+
+app.get('/indicadores', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+
+        // Obtener la fecha actual en formato 'YYYY-MM-DD'
+        const today = new Date().toISOString().slice(0, 10);
+
+        try {
+            // Consulta para obtener la cantidad de empleados creados hoy
+            const queryToday = 'SELECT COUNT(*) AS countToday FROM empleados WHERE DATE(fecha_creacion) = ?';
+            const [rowsToday] = await pool.query(queryToday, [today]);
+
+            const countToday = rowsToday[0].countToday;
+
+            res.render('EMPRESA/indicadores.hbs', {
+                nombreUsuario,
+                countToday
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Error al obtener los indicadores.');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+app.post('/indicadores/rango', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { startDate, endDate } = req.body;
+        const nombreUsuario = req.session.name;
+
+        try {
+            // Consulta para obtener la cantidad de empleados creados en el rango de fechas
+            const queryRange = 'SELECT COUNT(*) AS countRange FROM empleados WHERE DATE(fecha_creacion) BETWEEN ? AND ?';
+            const [rowsRange] = await pool.query(queryRange, [startDate, endDate]);
+
+            const countRange = rowsRange[0].countRange;
+
+            res.render('EMPRESA/indicadores.hbs', {
+                nombreUsuario,
+                countRange,
+                startDate,
+                endDate
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Error al obtener los indicadores.');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
+
+
+
+
+
 
 
 app.listen(app.get("port"), () => {

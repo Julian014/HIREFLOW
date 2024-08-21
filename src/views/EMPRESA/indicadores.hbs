@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Recursos Humanos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap");
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Nunito", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #f4f4f4, #e0e0e0);
+            background-attachment: fixed;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            width: 90%;
+            max-width: 1200px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        nav.menu-principal {
+            background-color: #493971;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        nav.menu-principal h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        nav.menu-principal ul {
+            list-style: none;
+            width: 100%;
+            padding: 0;
+        }
+
+        nav.menu-principal ul li {
+            margin-bottom: 15px;
+        }
+
+        nav.menu-principal ul li a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 20px;
+            color: #ffffff;
+            font-size: 1rem;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav.menu-principal ul li a .nav-icon {
+            margin-right: 10px;
+        }
+
+        nav.menu-principal ul li a:hover,
+        nav.menu-principal ul li.active a {
+            background-color: #ffffff;
+            color: #493971;
+            transform: translateY(-2px);
+        }
+
+        section.container {
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 15px;
+        }
+
+        section.container h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .indicator-section {
+            margin-bottom: 40px;
+        }
+
+        .indicator {
+            background-color: #90c9a7;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .indicator i {
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #413d4b;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #666567;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #d9d9d9;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            nav.menu-principal {
+                flex-direction: row;
+                padding: 10px;
+                justify-content: space-around;
+            }
+
+            nav.menu-principal ul {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+            }
+
+            nav.menu-principal ul li {
+                margin-bottom: 0;
+            }
+
+            nav.menu-principal ul li a {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            section.container {
+                padding: 20px;
+            }
+
+            section.container h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <nav class="menu-principal">
+            <h1>Indicadores</h1>
+            <ul>
+                <li class="nav-item active">
+                    <a href="/">
+                        <i class="fa fa-house nav-icon"></i>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/indicadores">
+                        <i class="fa fa-user nav-icon"></i>
+                        <span class="nav-text">Empleados</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/menuempleados">
+                        <i class="fa fa-calendar-check nav-icon"></i>
+                        <span class="nav-text">Administración</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fa fa-person-running nav-icon"></i>
+                        <span class="nav-text">Documentos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fa fa-sliders nav-icon"></i>
+                        <span class="nav-text">Configuración</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <section class="container">
+            <h1>Indicadores de Empleados</h1>
+            <p>Bienvenido, {{nombreUsuario}}</p>
+
+            <!-- Indicador 1: Empleados creados hoy -->
+            <div class="indicator-section">
+                <div class="indicator">
+                    <span>Empleados creados hoy:</span>
+                    <i class="fas fa-users"></i>
+                    <strong>{{countToday}}</strong>
+                </div>
+            </div>
+
+            <!-- Indicador 2: Filtrar por rango de fechas -->
+            <div class="indicator-section">
+                <h3>Filtrar por rango de fechas:</h3>
+                <form action="/indicadores/rango" method="POST">
+                    <div class="form-group">
+                        <label for="startDate">Fecha de inicio:</label>
+                        <input type="date" id="startDate" name="startDate" required>
+
+                        <label for="endDate">Fecha de fin:</label>
+                        <input type="date" id="endDate" name="endDate" required>
+                    </div>
+                    <button type="submit">Filtrar</button>
+                </form>
+
+                {{#if countRange}}
+                    <div class="result">
+                        <strong>Empleados creados en el rango:</strong>
+                        <p>{{countRange}}</p>
+                    </div>
+                {{/if}}
+            </div>
+
+            <!-- Indicador 3: Otro indicador -->
+            <div class="indicator-section">
+                <h3>Otro Indicador:</h3>
+                <div class="indicator">
+                    <span>Descripción del indicador:</span>
+                    <i class="fas fa-chart-line"></i>
+                    <strong>{{otroIndicador}}</strong>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
