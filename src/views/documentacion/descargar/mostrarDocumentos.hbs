@@ -1,51 +1,231 @@
-<!-- views/documentacion/mostrarDocumentos.hbs -->
-<h2>Documentos para {{nombreUsuario}}</h2>
-<ul>
-    {{#if documentos.cedula_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/cedula">Cédula</a></li>
-    {{/if}}
-    {{#if documentos.contratacion_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/contratacion">Contratación</a></li>
-    {{/if}}
-    {{#if documentos.titulo_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/titulo">Título</a></li>
-    {{/if}}
-    {{#if documentos.titulo_bachiller_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/titulo_bachiller">Título Bachiller</a></li>
-    {{/if}}
-    {{#if documentos.certificaciones_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/certificaciones">Certificaciones</a></li>
-    {{/if}}
-    {{#if documentos.recomendaciones_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/recomendaciones">Recomendaciones</a></li>
-    {{/if}}
-    {{#if documentos.antecedentes_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/antecedentes">Antecedentes</a></li>
-    {{/if}}
-    {{#if documentos.examen_medico_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/examen_medico">Examen Médico</a></li>
-    {{/if}}
-    {{#if documentos.foto_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/foto">Foto</a></li>
-    {{/if}}
-    {{#if documentos.comprobante_domicilio_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/comprobante_domicilio">Comprobante de Domicilio</a></li>
-    {{/if}}
-    {{#if documentos.cesantias_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/cesantias">Cesantías</a></li>
-    {{/if}}
-    {{#if documentos.hoja_vida_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/hoja_vida">Hoja de Vida</a></li>
-    {{/if}}
-    {{#if documentos.eps_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/eps">EPS</a></li>
-    {{/if}}
-    {{#if documentos.libreta_militar_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/libreta_militar">Libreta Militar</a></li>
-    {{/if}}
-    {{#if documentos.contraloria_path}}
-    <li><a href="/descargarDocumento/{{nombreUsuario}}/contraloria">Contraloría</a></li>
-    {{/if}}
-</ul>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos de {{nombreUsuario}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap");
 
-<a href="/descargarTodosDocumentos/{{nombreUsuario}}" class="btn btn-primary">Descargar Todos los Documentos</a>
+        body {
+            font-family: "Nunito", sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #413d4b;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #413d4b;
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .card a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card:hover {
+            background-color: #666567;
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+            background-color: #413d4b;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #666567;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsividad del contenedor */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            .btn {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Documentos para {{nombreUsuario}}</h2>
+        <div class="grid">
+            {{#if documentos.cedula_path}}
+            <div class="card">
+                <i class="fa fa-id-card"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/cedula">Cédula</a>
+            </div>
+            {{/if}}
+            {{#if documentos.contratacion_path}}
+            <div class="card">
+                <i class="fa fa-briefcase"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/contratacion">Contratación</a>
+            </div>
+            {{/if}}
+            {{#if documentos.titulo_path}}
+            <div class="card">
+                <i class="fa fa-certificate"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/titulo">Título</a>
+            </div>
+            {{/if}}
+            {{#if documentos.titulo_bachiller_path}}
+            <div class="card">
+                <i class="fa fa-graduation-cap"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/titulo_bachiller">Título Bachiller</a>
+            </div>
+            {{/if}}
+            {{#if documentos.certificaciones_path}}
+            <div class="card">
+                <i class="fa fa-award"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/certificaciones">Certificaciones</a>
+            </div>
+            {{/if}}
+            {{#if documentos.recomendaciones_path}}
+            <div class="card">
+                <i class="fa fa-thumbs-up"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/recomendaciones">Recomendaciones</a>
+            </div>
+            {{/if}}
+            {{#if documentos.antecedentes_path}}
+            <div class="card">
+                <i class="fa fa-gavel"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/antecedentes">Antecedentes</a>
+            </div>
+            {{/if}}
+            {{#if documentos.examen_medico_path}}
+            <div class="card">
+                <i class="fa fa-heartbeat"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/examen_medico">Examen Médico</a>
+            </div>
+            {{/if}}
+            {{#if documentos.foto_path}}
+            <div class="card">
+                <i class="fa fa-camera"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/foto">Foto</a>
+            </div>
+            {{/if}}
+            {{#if documentos.comprobante_domicilio_path}}
+            <div class="card">
+                <i class="fa fa-home"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/comprobante_domicilio">Comprobante de Domicilio</a>
+            </div>
+            {{/if}}
+            {{#if documentos.cesantias_path}}
+            <div class="card">
+                <i class="fa fa-money-check-alt"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/cesantias">Cesantías</a>
+            </div>
+            {{/if}}
+            {{#if documentos.hoja_vida_path}}
+            <div class="card">
+                <i class="fa fa-file-alt"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/hoja_vida">Hoja de Vida</a>
+            </div>
+            {{/if}}
+            {{#if documentos.eps_path}}
+            <div class="card">
+        <i class="fas fa-stethoscope document-icon"></i> <!-- Icono de examen médico -->
+                <a href="/descargarDocumento/{{nombreUsuario}}/eps">EPS</a>
+            </div>
+            {{/if}}
+            {{#if documentos.libreta_militar_path}}
+            <div class="card">
+        <i class="fas fa-shield-alt document-icon"></i> <!-- Icono de policía -->
+                <a href="/descargarDocumento/{{nombreUsuario}}/libreta_militar">Libreta Militar</a>
+            </div>
+            {{/if}}
+            {{#if documentos.contraloria_path}}
+            <div class="card">
+                <i class="fa fa-balance-scale"></i>
+                <a href="/descargarDocumento/{{nombreUsuario}}/contraloria">Contraloría</a>
+            </div>
+            {{/if}}
+        </div>
+        <a href="/descargarTodosDocumentos/{{nombreUsuario}}" class="btn">Descargar Todos los Documentos</a>
+    </div>
+</body>
+</html>
