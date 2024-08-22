@@ -137,23 +137,23 @@
     </style>
 </head>
 <body>
-  <div class="container">
+    <div class="container">
         <h2>Seleccionar Empleado</h2>
         <form action="/descargarDocumentos" method="POST">
             <label for="search">Buscar empleado:</label>
-            <input type="text" id="search" placeholder="Escriba un nombre..." onkeyup="filterEmployees()">
+            <input type="text" id="search" placeholder="Escriba un nombre o documento..." onkeyup="filterEmployees()">
             
             <label for="empleado">Seleccione un empleado:</label>
             <select id="empleado" name="empleado">
                 {{#each empleados}}
-                <option value="{{this.documento}}">{{this.nombre}} - {{this.documento}}</option>
+                <option value="{{this.nombre}}">{{this.nombre}} - {{this.documento}}</option>
                 {{/each}}
             </select>
             <button type="submit">Ver Documentos</button>
         </form>
     </div>
 
- <script>
+    <script>
         function filterEmployees() {
             const searchInput = document.getElementById('search').value.toLowerCase();
             const select = document.getElementById('empleado');

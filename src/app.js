@@ -1554,13 +1554,12 @@ app.get('/descargardocumentos', (req, res) => {
     }
 });
 
-
 app.post('/descargarDocumentos', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.body.empleado;
         const connection = req.db;
         try {
-            // Consulta para obtener los documentos del empleado seleccionado
+            // Consulta para obtener los documentos del empleado seleccionado por nombre
             const [documentos] = await connection.query('SELECT * FROM documentos WHERE usuario = ?', [nombreUsuario]);
             if (documentos.length > 0) {
                 res.render('documentacion/descargar/mostrarDocumentos.hbs', { documentos: documentos[0], nombreUsuario });
@@ -1575,6 +1574,7 @@ app.post('/descargarDocumentos', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 app.get('/descargarDocumento/:usuario/:tipo', async (req, res) => {
     if (req.session.loggedin === true) {
