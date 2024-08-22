@@ -93,7 +93,7 @@
             width: 100%;
             text-align: center;
             padding: 15px;
-            margin-top: 30px;
+            margin-top: 15px;
             background-color: #413d4b;
             color: #fff;
             border: none;
@@ -178,7 +178,7 @@
             {{/if}}
             {{#if documentos.examen_medico_path}}
             <div class="card">
-                <i class="fa fa-heartbeat"></i>
+                <i class="fas fa-stethoscope"></i>
                 <a href="/descargarDocumento/{{nombreUsuario}}/examen_medico">Examen Médico</a>
             </div>
             {{/if}}
@@ -208,13 +208,13 @@
             {{/if}}
             {{#if documentos.eps_path}}
             <div class="card">
-        <i class="fas fa-stethoscope document-icon"></i> <!-- Icono de examen médico -->
+                <i class="fas fa-stethoscope document-icon"></i>
                 <a href="/descargarDocumento/{{nombreUsuario}}/eps">EPS</a>
             </div>
             {{/if}}
             {{#if documentos.libreta_militar_path}}
             <div class="card">
-        <i class="fas fa-shield-alt document-icon"></i> <!-- Icono de policía -->
+                <i class="fas fa-shield-alt document-icon"></i>
                 <a href="/descargarDocumento/{{nombreUsuario}}/libreta_militar">Libreta Militar</a>
             </div>
             {{/if}}
@@ -226,6 +226,8 @@
             {{/if}}
         </div>
         <a href="/descargarTodosDocumentos/{{nombreUsuario}}" class="btn">Descargar Todos los Documentos</a>
+        <a href="/seleccionarEmpleado" class="btn">Seleccionar Otro Empleado</a>
+        <a href="/menudocumentos" class="btn">Volver al Menú</a>
     </div>
 </body>
 </html>
