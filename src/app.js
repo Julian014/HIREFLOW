@@ -640,12 +640,13 @@ const uploadFotos = multer({ storage: storageFotos });
 // Configurar almacenamiento de multer para guardar documentos en el sistema de archivos
 const storageDocumentos = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'src/public/uploads'); // Carpeta donde se guardarán los archivos
+        cb(null, path.join(__dirname, 'public/uploads')); 
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
     }
 });
+
 const uploadDocumentos = multer({ storage: storageDocumentos });
 
 
@@ -818,7 +819,6 @@ const adjustPath = (path) => {
     return path.replace(/src[\\\/]public[\\\/]/, ''); // Elimina "src/public/" o "src\public\"
 };
 
-
 app.post("/subirdocumentos", uploadDocumentos.fields([
     { name: 'documentoCedula' }, 
     { name: 'documentoContratacion' }, 
@@ -840,80 +840,65 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
         const nombreUsuario = req.session.name;
         const connection = req.db;
 
-        // Obtener las rutas de los archivos subidos, si existen, y ajustar las rutas
-        const documentoCedulaPath = adjustPath(req.files.documentoCedula ? req.files.documentoCedula[0].path : null);
-        const documentoContratacionPath = adjustPath(req.files.documentoContratacion ? req.files.documentoContratacion[0].path : null);
-        const documentoTituloPath = adjustPath(req.files.documentoTitulo ? req.files.documentoTitulo[0].path : null);
-        const documentoTituloBachillerPath = adjustPath(req.files.documentoTituloBachiller ? req.files.documentoTituloBachiller[0].path : null);
-        const documentoCertificacionesPath = adjustPath(req.files.documentoCertificaciones ? req.files.documentoCertificaciones[0].path : null);
-        const documentoRecomendacionesPath = adjustPath(req.files.documentoRecomendaciones ? req.files.documentoRecomendaciones[0].path : null);
-        const documentoAntecedentesPath = adjustPath(req.files.documentoAntecedentes ? req.files.documentoAntecedentes[0].path : null);
-        const documentoExamenMedicoPath = adjustPath(req.files.documentoExamenMedico ? req.files.documentoExamenMedico[0].path : null);
-        const documentoFotoPath = adjustPath(req.files.documentoFoto ? req.files.documentoFoto[0].path : null);
-        const documentoComprobanteDomicilioPath = adjustPath(req.files.documentoComprobanteDomicilio ? req.files.documentoComprobanteDomicilio[0].path : null);
-        const documentoCesantiasPath = adjustPath(req.files.documentoCesantias ? req.files.documentoCesantias[0].path : null);
-        const documentoHojaVidaPath = adjustPath(req.files.documentoHojaVida ? req.files.documentoHojaVida[0].path : null);
-        const documentoEPSPath = adjustPath(req.files.documentoEPS ? req.files.documentoEPS[0].path : null);
-        const documentoLibretaMilitarPath = adjustPath(req.files.documentoLibretaMilitar ? req.files.documentoLibretaMilitar[0].path : null);
-        const documentoContraloriaPath = adjustPath(req.files.documentoContraloria ? req.files.documentoContraloria[0].path : null);
-
         try {
+            // Leer los archivos subidos desde el sistema de archivos y convertirlos a binario
+            const documentoCedula = req.files.documentoCedula ? fs.readFileSync(req.files.documentoCedula[0].path) : null;
+            const documentoContratacion = req.files.documentoContratacion ? fs.readFileSync(req.files.documentoContratacion[0].path) : null;
+            const documentoTitulo = req.files.documentoTitulo ? fs.readFileSync(req.files.documentoTitulo[0].path) : null;
+            const documentoTituloBachiller = req.files.documentoTituloBachiller ? fs.readFileSync(req.files.documentoTituloBachiller[0].path) : null;
+            const documentoCertificaciones = req.files.documentoCertificaciones ? fs.readFileSync(req.files.documentoCertificaciones[0].path) : null;
+            const documentoRecomendaciones = req.files.documentoRecomendaciones ? fs.readFileSync(req.files.documentoRecomendaciones[0].path) : null;
+            const documentoAntecedentes = req.files.documentoAntecedentes ? fs.readFileSync(req.files.documentoAntecedentes[0].path) : null;
+            const documentoExamenMedico = req.files.documentoExamenMedico ? fs.readFileSync(req.files.documentoExamenMedico[0].path) : null;
+            const documentoFoto = req.files.documentoFoto ? fs.readFileSync(req.files.documentoFoto[0].path) : null;
+            const documentoComprobanteDomicilio = req.files.documentoComprobanteDomicilio ? fs.readFileSync(req.files.documentoComprobanteDomicilio[0].path) : null;
+            const documentoCesantias = req.files.documentoCesantias ? fs.readFileSync(req.files.documentoCesantias[0].path) : null;
+            const documentoHojaVida = req.files.documentoHojaVida ? fs.readFileSync(req.files.documentoHojaVida[0].path) : null;
+            const documentoEPS = req.files.documentoEPS ? fs.readFileSync(req.files.documentoEPS[0].path) : null;
+            const documentoLibretaMilitar = req.files.documentoLibretaMilitar ? fs.readFileSync(req.files.documentoLibretaMilitar[0].path) : null;
+            const documentoContraloria = req.files.documentoContraloria ? fs.readFileSync(req.files.documentoContraloria[0].path) : null;
+
             // Consultar si ya existen documentos subidos para el usuario
             const query = 'SELECT * FROM documentos WHERE usuario = ?';
             const [results] = await connection.query(query, [nombreUsuario]);
 
             if (results.length > 0) {
-                // Actualizar documentos existentes y restablecer los campos de validación a NULL para permitir nueva validación
+                // Actualizar documentos existentes
                 const updateDocumentQuery = `
                     UPDATE documentos SET
                     cedula_path = COALESCE(?, cedula_path),
-                    cedula_validado = IF(?, NULL, cedula_validado),
                     contratacion_path = COALESCE(?, contratacion_path),
-                    contratacion_validado = IF(?, NULL, contratacion_validado),
                     titulo_path = COALESCE(?, titulo_path),
-                    titulo_validado = IF(?, NULL, titulo_validado),
                     titulo_bachiller_path = COALESCE(?, titulo_bachiller_path),
-                    titulo_bachiller_validado = IF(?, NULL, titulo_bachiller_validado),
                     certificaciones_path = COALESCE(?, certificaciones_path),
-                    certificaciones_validado = IF(?, NULL, certificaciones_validado),
                     recomendaciones_path = COALESCE(?, recomendaciones_path),
-                    recomendaciones_validado = IF(?, NULL, recomendaciones_validado),
                     antecedentes_path = COALESCE(?, antecedentes_path),
-                    antecedentes_validado = IF(?, NULL, antecedentes_validado),
                     examen_medico_path = COALESCE(?, examen_medico_path),
-                    examen_medico_validado = IF(?, NULL, examen_medico_validado),
                     foto_path = COALESCE(?, foto_path),
-                    foto_validado = IF(?, NULL, foto_validado),
                     comprobante_domicilio_path = COALESCE(?, comprobante_domicilio_path),
-                    comprobante_domicilio_validado = IF(?, NULL, comprobante_domicilio_validado),
                     cesantias_path = COALESCE(?, cesantias_path),
-                    cesantias_validado = IF(?, NULL, cesantias_validado),
                     hoja_vida_path = COALESCE(?, hoja_vida_path),
-                    hoja_vida_validado = IF(?, NULL, hoja_vida_validado),
                     eps_path = COALESCE(?, eps_path),
-                    eps_validado = IF(?, NULL, eps_validado),
                     libreta_militar_path = COALESCE(?, libreta_militar_path),
-                    libreta_militar_validado = IF(?, NULL, libreta_militar_validado),
-                    contraloria_path = COALESCE(?, contraloria_path),
-                    contraloria_validado = IF(?, NULL, contraloria_validado)
+                    contraloria_path = COALESCE(?, contraloria_path)
                     WHERE usuario = ?`;
 
                 await connection.query(updateDocumentQuery, [
-                    documentoCedulaPath, documentoCedulaPath !== null,
-                    documentoContratacionPath, documentoContratacionPath !== null,
-                    documentoTituloPath, documentoTituloPath !== null,
-                    documentoTituloBachillerPath, documentoTituloBachillerPath !== null,
-                    documentoCertificacionesPath, documentoCertificacionesPath !== null,
-                    documentoRecomendacionesPath, documentoRecomendacionesPath !== null,
-                    documentoAntecedentesPath, documentoAntecedentesPath !== null,
-                    documentoExamenMedicoPath, documentoExamenMedicoPath !== null,
-                    documentoFotoPath, documentoFotoPath !== null,
-                    documentoComprobanteDomicilioPath, documentoComprobanteDomicilioPath !== null,
-                    documentoCesantiasPath, documentoCesantiasPath !== null,
-                    documentoHojaVidaPath, documentoHojaVidaPath !== null,
-                    documentoEPSPath, documentoEPSPath !== null,
-                    documentoLibretaMilitarPath, documentoLibretaMilitarPath !== null,
-                    documentoContraloriaPath, documentoContraloriaPath !== null,
+                    documentoCedula,
+                    documentoContratacion,
+                    documentoTitulo,
+                    documentoTituloBachiller,
+                    documentoCertificaciones,
+                    documentoRecomendaciones,
+                    documentoAntecedentes,
+                    documentoExamenMedico,
+                    documentoFoto,
+                    documentoComprobanteDomicilio,
+                    documentoCesantias,
+                    documentoHojaVida,
+                    documentoEPS,
+                    documentoLibretaMilitar,
+                    documentoContraloria,
                     nombreUsuario
                 ]);
                 res.send('Archivos actualizados exitosamente.');
@@ -927,21 +912,21 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
 
                 await connection.query(insertDocumentQuery, [
                     nombreUsuario,
-                    documentoCedulaPath,
-                    documentoContratacionPath,
-                    documentoTituloPath,
-                    documentoTituloBachillerPath,
-                    documentoCertificacionesPath,
-                    documentoRecomendacionesPath,
-                    documentoAntecedentesPath,
-                    documentoExamenMedicoPath,
-                    documentoFotoPath,
-                    documentoComprobanteDomicilioPath,
-                    documentoCesantiasPath,
-                    documentoHojaVidaPath,
-                    documentoEPSPath,
-                    documentoLibretaMilitarPath,
-                    documentoContraloriaPath
+                    documentoCedula,
+                    documentoContratacion,
+                    documentoTitulo,
+                    documentoTituloBachiller,
+                    documentoCertificaciones,
+                    documentoRecomendaciones,
+                    documentoAntecedentes,
+                    documentoExamenMedico,
+                    documentoFoto,
+                    documentoComprobanteDomicilio,
+                    documentoCesantias,
+                    documentoHojaVida,
+                    documentoEPS,
+                    documentoLibretaMilitar,
+                    documentoContraloria
                 ]);
                 res.send('Archivos subidos exitosamente.');
             }
@@ -953,10 +938,6 @@ app.post("/subirdocumentos", uploadDocumentos.fields([
         res.redirect("/login");
     }
 });
-
-
-
-
 
 // Servir archivos estáticos desde la carpeta 'src/uploads'
 app.get('/validacion', async (req, res) => {
