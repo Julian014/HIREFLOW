@@ -977,6 +977,37 @@ app.get('/validacion', async (req, res) => {
 });
 
 
+
+app.get('/documento/:usuario/:tipo', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { usuario, tipo } = req.params;
+        const connection = req.db;
+
+        try {
+            // Consultar el documento específico de la base de datos
+            const query = `SELECT ${tipo}_path AS documento FROM documentos WHERE usuario = ?`;
+            const [results] = await connection.query(query, [usuario]);
+
+            if (results.length > 0 && results[0].documento) {
+                // Configurar el encabezado para que el navegador trate el contenido como un archivo
+                res.setHeader('Content-Disposition', `inline; filename="${tipo}.pdf"`); // Cambia la extensión según el tipo de archivo
+                res.setHeader('Content-Type', 'application/pdf'); // Cambia el tipo MIME según el tipo de archivo
+                res.send(results[0].documento);
+            } else {
+                res.status(404).send('Documento no encontrado');
+            }
+        } catch (err) {
+            console.error('Error al obtener el documento:', err);
+            res.status(500).send('Error interno al obtener el documento.');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
 app.post('/validardocumentos', async (req, res) => {
     const data = req.body;
     const updates = [];

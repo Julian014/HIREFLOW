@@ -168,7 +168,7 @@
     </header>
 
     <main>
-        <div class="section">
+          <div class="section">
             <h2>Lista de Empleados</h2>
             <input type="text" id="filtro" class="search-box" placeholder="Buscar por nombre de usuario" oninput="filtrarUsuarios()">
             <select id="empleados" onchange="mostrarDocumentos()">
@@ -179,15 +179,14 @@
             </select>
         </div>
 
-        <form action="/validardocumentos" method="post">
+      <form action="/validardocumentos" method="post">
             {{#each documentos}}
             <div class="section document-section hidden" data-usuario="{{this.usuario}}">
                 <h2>Empleado: {{this.usuario}}</h2>
 
-                <!-- Cédula -->
-                {{#if (not this.cedula_validado)}}
+        {{#if (not this.cedula_validado)}}
                 <div class="document-card">
-                    <p>Cédula: <a class="document-link" href="{{this.cedula_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Cédula: <a class="document-link" href="/documento/{{this.usuario}}/cedula" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_cedula" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'cedula')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_cedula" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'cedula')"> No</label>
@@ -195,11 +194,10 @@
                     </div>
                 </div>
                 {{/if}}
-
                 <!-- Contratación -->
-                {{#if (not this.contratacion_validado)}}
+           {{#if (not this.contratacion_validado)}}
                 <div class="document-card">
-                    <p>Contratación: <a class="document-link" href="{{this.contratacion_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Contratación: <a class="document-link" href="/documento/{{this.usuario}}/contratacion" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_contratacion" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'contratacion')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_contratacion" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'contratacion')"> No</label>
@@ -209,21 +207,14 @@
                 {{/if}}
 
                 <!-- Título -->
-                {{#if (not this.titulo_validado)}}
-                <div class="document-card">
-                    <p>Título: <a class="document-link" href="{{this.titulo_path}}" target="_blank">Ver Documento</a></p>
-                    <div class="validation-options">
-                        <label><input type="radio" name="{{this.usuario}}_titulo" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'titulo')"> Sí</label>
-                        <label><input type="radio" name="{{this.usuario}}_titulo" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'titulo')"> No</label>
-                        <input type="text" name="{{this.usuario}}_titulo_razon" id="razon_{{this.usuario}}_titulo" class="hidden" placeholder="Especifica la razón">
-                    </div>
-                </div>
-                {{/if}}
+           
+
+
 
                 <!-- Título de Bachiller -->
                 {{#if (not this.titulo_bachiller_validado)}}
                 <div class="document-card">
-                    <p>Título de Bachiller: <a class="document-link" href="{{this.titulo_bachiller_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Título de Bachiller: <a class="document-link" href="/documento/{{this.usuario}}/titulo_bachiller" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_titulo_bachiller" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'titulo_bachiller')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_titulo_bachiller" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'titulo_bachiller')"> No</label>
@@ -233,9 +224,9 @@
                 {{/if}}
 
                 <!-- Certificaciones -->
-                {{#if (not this.certificaciones_validado)}}
+                 {{#if (not this.certificaciones_validado)}}
                 <div class="document-card">
-                    <p>Certificaciones: <a class="document-link" href="{{this.certificaciones_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Certificaciones: <a class="document-link" href="/documento/{{this.usuario}}/certificaciones" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_certificaciones" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'certificaciones')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_certificaciones" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'certificaciones')"> No</label>
@@ -245,9 +236,9 @@
                 {{/if}}
 
                 <!-- Recomendaciones -->
-                {{#if (not this.recomendaciones_validado)}}
+        {{#if (not this.recomendaciones_validado)}}
                 <div class="document-card">
-                    <p>Recomendaciones: <a class="document-link" href="{{this.recomendaciones_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Recomendaciones: <a class="document-link" href="/documento/{{this.usuario}}/recomendaciones" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_recomendaciones" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'recomendaciones')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_recomendaciones" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'recomendaciones')"> No</label>
@@ -259,7 +250,7 @@
                 <!-- Antecedentes -->
                 {{#if (not this.antecedentes_validado)}}
                 <div class="document-card">
-                    <p>Antecedentes: <a class="document-link" href="{{this.antecedentes_path}}" target="_blank">Ver Documento</a></p>
+<p>Antecedentes: <a class="document-link" href="/documento/{{this.usuario}}/antecedentes" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_antecedentes" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'antecedentes')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_antecedentes" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'antecedentes')"> No</label>
@@ -269,9 +260,9 @@
                 {{/if}}
 
                 <!-- Examen Médico -->
-                {{#if (not this.examen_medico_validado)}}
+               {{#if (not this.examen_medico_validado)}}
                 <div class="document-card">
-                    <p>Examen Médico: <a class="document-link" href="{{this.examen_medico_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Examen Médico: <a class="document-link" href="/documento/{{this.usuario}}/examen_medico" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_examen_medico" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'examen_medico')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_examen_medico" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'examen_medico')"> No</label>
@@ -281,9 +272,9 @@
                 {{/if}}
 
                 <!-- Foto -->
-                {{#if (not this.foto_validado)}}
+                  {{#if (not this.foto_validado)}}
                 <div class="document-card">
-                    <p>Foto: <a class="document-link" href="{{this.foto_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Foto: <a class="document-link" href="/documento/{{this.usuario}}/foto" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_foto" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'foto')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_foto" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'foto')"> No</label>
@@ -292,10 +283,11 @@
                 </div>
                 {{/if}}
 
+
                 <!-- Comprobante de Domicilio -->
-                {{#if (not this.comprobante_domicilio_validado)}}
+             {{#if (not this.comprobante_domicilio_validado)}}
                 <div class="document-card">
-                    <p>Comprobante de Domicilio: <a class="document-link" href="{{this.comprobante_domicilio_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Comprobante de Domicilio: <a class="document-link" href="/documento/{{this.usuario}}/comprobante_domicilio" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_comprobante_domicilio" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'comprobante_domicilio')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_comprobante_domicilio" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'comprobante_domicilio')"> No</label>
@@ -305,9 +297,9 @@
                 {{/if}}
 
                 <!-- Cesantías -->
-                {{#if (not this.cesantias_validado)}}
+                     {{#if (not this.cesantias_validado)}}
                 <div class="document-card">
-                    <p>Cesantías: <a class="document-link" href="{{this.cesantias_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Cesantías: <a class="document-link" href="/documento/{{this.usuario}}/cesantias" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_cesantias" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'cesantias')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_cesantias" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'cesantias')"> No</label>
@@ -317,9 +309,9 @@
                 {{/if}}
 
                 <!-- Hoja de Vida -->
-                {{#if (not this.hoja_vida_validado)}}
+                    {{#if (not this.hoja_vida_validado)}}
                 <div class="document-card">
-                    <p>Hoja de Vida: <a class="document-link" href="{{this.hoja_vida_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Hoja de Vida: <a class="document-link" href="/documento/{{this.usuario}}/hoja_vida" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_hoja_vida" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'hoja_vida')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_hoja_vida" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'hoja_vida')"> No</label>
@@ -328,10 +320,11 @@
                 </div>
                 {{/if}}
 
+
                 <!-- EPS -->
-                {{#if (not this.eps_validado)}}
+            {{#if (not this.eps_validado)}}
                 <div class="document-card">
-                    <p>EPS: <a class="document-link" href="{{this.eps_path}}" target="_blank">Ver Documento</a></p>
+                    <p>EPS: <a class="document-link" href="/documento/{{this.usuario}}/eps" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_eps" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'eps')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_eps" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'eps')"> No</label>
@@ -339,11 +332,10 @@
                     </div>
                 </div>
                 {{/if}}
-
                 <!-- Libreta Militar -->
-                {{#if (not this.libreta_militar_validado)}}
+              {{#if (not this.libreta_militar_validado)}}
                 <div class="document-card">
-                    <p>Libreta Militar: <a class="document-link" href="{{this.libreta_militar_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Libreta Militar: <a class="document-link" href="/documento/{{this.usuario}}/libreta_militar" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_libreta_militar" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'libreta_militar')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_libreta_militar" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'libreta_militar')"> No</label>
@@ -351,11 +343,10 @@
                     </div>
                 </div>
                 {{/if}}
-
                 <!-- Contraloría -->
-                {{#if (not this.contraloria_validado)}}
+      {{#if (not this.contraloria_validado)}}
                 <div class="document-card">
-                    <p>Contraloría: <a class="document-link" href="{{this.contraloria_path}}" target="_blank">Ver Documento</a></p>
+                    <p>Contraloría: <a class="document-link" href="/documento/{{this.usuario}}/contraloria" target="_blank">Ver Documento</a></p>
                     <div class="validation-options">
                         <label><input type="radio" name="{{this.usuario}}_contraloria" value="si" onchange="mostrarRazon(this, '{{this.usuario}}', 'contraloria')"> Sí</label>
                         <label><input type="radio" name="{{this.usuario}}_contraloria" value="no" onchange="mostrarRazon(this, '{{this.usuario}}', 'contraloria')"> No</label>
