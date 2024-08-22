@@ -418,9 +418,9 @@
 
     <main>
         <nav>
-            <h1>Gestión de RRHH</h1>
-            <img class="logo" src="https://example.com/hr-logo.png" alt="Logo RRHH">
-            <ul>
+            <h1>HireFlow</h1>
+  <img class="logo" src="imagenes/logo_nexus-removebg-preview.png" alt="Logo RRHH" />
+            <br>            <ul>
                 <li class="nav-item">
                     <a href="/">
                         <i class="fa fa-house nav-icon"></i>
@@ -447,6 +447,14 @@
                         <span class="nav-text">Soporte</span>
                     </a>
                 </li>
+                {{#if administrativo}}
+<li class="nav-item">
+    <a href="/menudocumentos">
+        <i class="fa fa-folder-open nav-icon"></i>
+        <span class="nav-text">Documentación</span>
+    </a>
+</li>
+{{/if}}
                 {{#if administrativo}}
                 <li class="nav-item">
                     <a href="#">

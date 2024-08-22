@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Empleado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap");
+
+        body {
+            font-family: "Nunito", sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #413d4b;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #484b57;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #d9d9d9;
+            font-size: 1.1rem;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #666567;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #d9d9d9;
+            font-size: 1.1rem;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            border-color: #666567;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            color: #fff;
+            background-color: #413d4b;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #666567;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Accessible Focus Styles */
+        button:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(65, 61, 75, 0.3);
+        }
+
+        /* Ensuring the container is responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            button {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+        <h2>Seleccionar Empleado</h2>
+        <form action="/descargarDocumentos" method="POST">
+            <label for="search">Buscar empleado:</label>
+            <input type="text" id="search" placeholder="Escriba un nombre..." onkeyup="filterEmployees()">
+            
+            <label for="empleado">Seleccione un empleado:</label>
+            <select id="empleado" name="empleado">
+                {{#each empleados}}
+                <option value="{{this.documento}}">{{this.nombre}} - {{this.documento}}</option>
+                {{/each}}
+            </select>
+            <button type="submit">Ver Documentos</button>
+        </form>
+    </div>
+
+ <script>
+        function filterEmployees() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const select = document.getElementById('empleado');
+            const options = select.querySelectorAll('option');
+
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                const isVisible = text.includes(searchInput);
+                option.style.display = isVisible ? 'block' : 'none';
+            });
+
+            // Automatically select the first visible option after filtering
+            const visibleOptions = Array.from(options).filter(option => option.style.display === 'block');
+            if (visibleOptions.length > 0) {
+                select.value = visibleOptions[0].value;
+            } else {
+                select.value = '';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!-- views/documentacion/mostrarDocumentos.hbs -->
+<h2>Documentos para {{nombreUsuario}}</h2>
+<ul>
+    {{#if documentos.cedula_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/cedula">Cédula</a></li>
+    {{/if}}
+    {{#if documentos.contratacion_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/contratacion">Contratación</a></li>
+    {{/if}}
+    {{#if documentos.titulo_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/titulo">Título</a></li>
+    {{/if}}
+    {{#if documentos.titulo_bachiller_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/titulo_bachiller">Título Bachiller</a></li>
+    {{/if}}
+    {{#if documentos.certificaciones_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/certificaciones">Certificaciones</a></li>
+    {{/if}}
+    {{#if documentos.recomendaciones_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/recomendaciones">Recomendaciones</a></li>
+    {{/if}}
+    {{#if documentos.antecedentes_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/antecedentes">Antecedentes</a></li>
+    {{/if}}
+    {{#if documentos.examen_medico_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/examen_medico">Examen Médico</a></li>
+    {{/if}}
+    {{#if documentos.foto_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/foto">Foto</a></li>
+    {{/if}}
+    {{#if documentos.comprobante_domicilio_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/comprobante_domicilio">Comprobante de Domicilio</a></li>
+    {{/if}}
+    {{#if documentos.cesantias_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/cesantias">Cesantías</a></li>
+    {{/if}}
+    {{#if documentos.hoja_vida_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/hoja_vida">Hoja de Vida</a></li>
+    {{/if}}
+    {{#if documentos.eps_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/eps">EPS</a></li>
+    {{/if}}
+    {{#if documentos.libreta_militar_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/libreta_militar">Libreta Militar</a></li>
+    {{/if}}
+    {{#if documentos.contraloria_path}}
+    <li><a href="/descargarDocumento/{{nombreUsuario}}/contraloria">Contraloría</a></li>
+    {{/if}}
+</ul>
+
+<a href="/descargarTodosDocumentos/{{nombreUsuario}}" class="btn btn-primary">Descargar Todos los Documentos</a>

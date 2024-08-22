@@ -1512,11 +1512,159 @@ app.post('/indicadores/rango', async (req, res) => {
 
 
 
+app.get('/menudocumentos', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('documentacion/homedocumentos.hbs', {navopertaivo: true,nombreUsuario });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/seleccionarEmpleado', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const connection = req.db;
+        try {
+            // Consulta para obtener la lista de nombres y números de documento
+            const query = `
+                SELECT DISTINCT e.nombre, e.documento
+                FROM empleados e
+                JOIN documentos d ON e.nombre = d.usuario
+            `;
+            
+            const [empleados] = await connection.query(query);
+            res.render('documentacion/descargar/seleccionarEmpleado.hbs', { empleados });
+        } catch (err) {
+            console.error('Error al obtener la lista de empleados:', err);
+            res.status(500).send('Error interno al procesar la solicitud');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+app.get('/descargardocumentos', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('documentacion/descargar/descargar.hbs', {navopertaivo: true,nombreUsuario });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+app.post('/descargarDocumentos', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.body.empleado;
+        const connection = req.db;
+        try {
+            // Consulta para obtener los documentos del empleado seleccionado
+            const [documentos] = await connection.query('SELECT * FROM documentos WHERE usuario = ?', [nombreUsuario]);
+            if (documentos.length > 0) {
+                res.render('documentacion/descargar/mostrarDocumentos.hbs', { documentos: documentos[0], nombreUsuario });
+            } else {
+                res.status(404).send('No se encontraron documentos para este empleado.');
+            }
+        } catch (err) {
+            console.error('Error al obtener los documentos:', err);
+            res.status(500).send('Error interno al procesar la solicitud');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/descargarDocumento/:usuario/:tipo', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const usuario = req.params.usuario;
+        const tipo = req.params.tipo;
+        const connection = req.db;
+        try {
+            // Construir el nombre de la columna basado en el tipo de documento
+            const column = tipo + '_path';
+            const [documento] = await connection.query(`SELECT ${column} FROM documentos WHERE usuario = ?`, [usuario]);
+
+            if (documento.length > 0 && documento[0][column]) {
+                const buffer = documento[0][column];
+                res.setHeader('Content-Disposition', `attachment; filename=${tipo}.pdf`);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.send(buffer);
+            } else {
+                res.status(404).send('Documento no encontrado.');
+            }
+        } catch (err) {
+            console.error('Error al descargar el documento:', err);
+            res.status(500).send('Error interno al procesar la solicitud');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
 
+const archiver = require('archiver');
 
+
+app.get('/descargarTodosDocumentos/:usuario', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const usuario = req.params.usuario;
+        const connection = req.db;
+
+        try {
+            const [documentos] = await connection.query('SELECT * FROM documentos WHERE usuario = ?', [usuario]);
+
+            if (documentos.length > 0) {
+                const documento = documentos[0];
+                const dirPath = path.join(__dirname, 'public', 'tmp');
+
+                // Crear el directorio si no existe
+                if (!fs.existsSync(dirPath)) {
+                    fs.mkdirSync(dirPath, { recursive: true });
+                }
+
+                const outputPath = path.join(dirPath, `${usuario}_documentos.zip`);
+                const output = fs.createWriteStream(outputPath);
+                const archive = archiver('zip', { zlib: { level: 9 } });
+
+                // Manejar la salida del stream
+                output.on('close', function () {
+                    res.download(outputPath, `${usuario}_documentos.zip`, (err) => {
+                        if (err) {
+                            console.error('Error al descargar el archivo:', err);
+                        }
+                        // Eliminar el archivo zip temporal después de la descarga
+                        fs.unlinkSync(outputPath);
+                    });
+                });
+
+                // Iniciar el proceso de compresión
+                archive.pipe(output);
+
+                // Añadir cada documento al archivo zip
+                for (const key in documento) {
+                    if (documento[key] && key.endsWith('_path')) {
+                        const buffer = documento[key];
+                        const fileName = key.replace('_path', '') + '.pdf';
+                        archive.append(buffer, { name: fileName });
+                    }
+                }
+
+                await archive.finalize();
+            } else {
+                res.status(404).send('No se encontraron documentos para este usuario.');
+            }
+        } catch (err) {
+            console.error('Error al crear el archivo zip:', err);
+            res.status(500).send('Error interno al procesar la solicitud');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
