@@ -1,35 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Actualizar Documentación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap");
+
+        body {
+            font-family: "Nunito", sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://example.com/hr-background.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #413d4b;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #413d4b;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            width: 70px;
+            height: 4px;
+            background-color: #90c9a7;
+            display: block;
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        label {
+            font-weight: 700;
+            color: #666567;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #666567;
+            font-size: 1.4rem;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            color: #333;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        select:focus, input[type="file"]:focus {
+            border-color: #90c9a7;
+            box-shadow: 0 0 10px rgba(144, 201, 167, 0.4);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #413d4b;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 8px 20px rgba(65, 61, 75, 0.5);
+        }
+
+        button:hover {
+            background-color: #666567;
+            box-shadow: 0 12px 25px rgba(65, 61, 75, 0.7);
+            transform: translateY(-3px);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            text-decoration: none;
+            color: #413d4b;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #90c9a7;
+            transform: translateY(-3px);
+        }
+
+        /* Efectos adicionales */
+        select:focus, input[type="file"]:focus {
+            border-color: #413d4b;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(65, 61, 75, 0.3);
+        }
+
+    </style>
 </head>
 <body>
-    
-    <h1>Actualizar Documentación</h1>
-<form action="/actualizarDocumentacion" method="post" enctype="multipart/form-data">
-    <label for="usuario">Seleccione el usuario:</label>
-    <select name="usuario" id="usuario" required>
-        {{#each usuarios}}
-            <option value="{{this.id}}">{{this.usuario}}</option>
-        {{/each}}
-    </select>
 
-    <label for="documentoActualizar">Seleccione el documento a actualizar:</label>
-    <select name="documentoActualizar" id="documentoActualizar" required>
-        <option value="cedula_path">Cédula</option>
-        <option value="contratacion_path">Contratación</option>
-        <option value="titulo_path">Título</option>
-        <!-- Agrega más opciones según los documentos disponibles -->
-    </select>
+    <div class="container">
+        <h1>Actualizar Documentación</h1>
+        <form action="/actualizarDocumentacion" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="usuario">Seleccione el usuario:</label>
+                <i class="fa fa-user"></i>
+                <select name="usuario" id="usuario" required>
+                    {{#each usuarios}}
+                        <option value="{{this.id}}">{{this.usuario}}</option>
+                    {{/each}}
+                </select>
+            </div>
 
-    <label for="documento">Subir nuevo archivo:</label>
-    <input type="file" name="documento" id="documento" accept=".pdf" required>
+            <div class="form-group">
+                <label for="documentoActualizar">Seleccione el documento a actualizar:</label>
+                <i class="fa fa-folder-open"></i>
+                <select name="documentoActualizar" id="documentoActualizar" required>
+                    <option value="cedula_path">Cédula</option>
+                    <option value="contratacion_path">Contratación</option>
+                    <option value="titulo_path">Título</option>
+                    <option value="titulo_bachiller_path">Título Bachiller</option>
+                    <option value="certificaciones_path">Certificaciones</option>
+                    <option value="recomendaciones_path">Recomendaciones</option>
+                    <option value="antecedentes_path">Antecedentes</option>
+                    <option value="examen_medico_path">Examen Médico</option>
+                    <option value="foto_path">Foto</option>
+                    <option value="comprobante_domicilio_path">Comprobante de Domicilio</option>
+                    <option value="cesantias_path">Cesantías</option>
+                    <option value="hoja_vida_path">Hoja de Vida</option>
+                    <option value="eps_path">EPS</option>
+                    <option value="libreta_militar_path">Libreta Militar</option>
+                    <option value="contraloria_path">Contraloría</option>
+                </select>
+            </div>
 
-    <button type="submit">Actualizar Documento</button>
-</form>
+            <div class="form-group">
+                <label for="documento">Subir nuevo archivo:</label>
+                <i class="fa fa-file-upload"></i>
+                <input type="file" name="documento" id="documento" accept=".pdf" required>
+            </div>
 
+            <button type="submit">Actualizar Documento</button>
+        </form>
+        <a href="/" class="back-link">Volver al inicio</a>
+    </div>
 
 </body>
 </html>
