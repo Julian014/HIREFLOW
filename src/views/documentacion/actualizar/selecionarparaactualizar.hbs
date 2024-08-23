@@ -81,7 +81,7 @@
             font-size: 1.4rem;
         }
 
-        select, input[type="file"] {
+        input[type="text"], select, input[type="file"] {
             width: 100%;
             padding: 15px 15px 15px 50px;
             margin-top: 5px;
@@ -93,7 +93,7 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        select:focus, input[type="file"]:focus {
+        input[type="text"]:focus, select:focus, input[type="file"]:focus {
             border-color: #90c9a7;
             box-shadow: 0 0 10px rgba(144, 201, 167, 0.4);
             outline: none;
@@ -137,7 +137,7 @@
         }
 
         /* Efectos adicionales */
-        select:focus, input[type="file"]:focus {
+        input[type="text"]:focus, select:focus, input[type="file"]:focus {
             border-color: #413d4b;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(65, 61, 75, 0.3);
@@ -150,6 +150,11 @@
     <div class="container">
         <h1>Actualizar Documentación</h1>
         <form action="/actualizarDocumentacion" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="filtroNombre">Filtrar por nombre:</label>
+                <i class="fa fa-search"></i>
+                <input type="text" id="filtroNombre" placeholder="Buscar usuario...">
+            </div>
             <div class="form-group">
                 <label for="usuario">Seleccione el usuario:</label>
                 <i class="fa fa-user"></i>
@@ -193,5 +198,21 @@
         <a href="/" class="back-link">Volver al inicio</a>
     </div>
 
+    <script>
+        // Script para filtrar el select de usuarios por nombre
+        document.getElementById('filtroNombre').addEventListener('input', function() {
+            var filter = this.value.toLowerCase();
+            var options = document.getElementById('usuario').options;
+
+            for (var i = 0; i < options.length; i++) {
+                var text = options[i].text.toLowerCase();
+                if (text.includes(filter)) {
+                    options[i].style.display = '';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1678,7 +1678,10 @@ app.get('/actualizarDocumentacion', async (req, res) => {
         try {
             // Obtener la lista de usuarios
             const [usuarios] = await connection.query('SELECT id, usuario FROM documentos');
-            
+
+
+
+         
             res.render('documentacion/actualizar/selecionarparaactualizar.hbs', {
                 navopertaivo: true,
                 nombreUsuario,
