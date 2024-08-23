@@ -1730,6 +1730,64 @@ app.post("/actualizarDocumentacion", uploadDocumentos.single('documento'), async
 });
 
 
+
+
+
+
+
+app.get('/EliminarDocumentacion', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const connection = req.db;
+        const nombreUsuario = req.session.name;
+
+        try {
+            // Obtener la lista de usuarios con sus números de documento
+            const [usuarios] = await connection.query(`
+                SELECT DISTINCT e.nombre AS usuario, e.documento 
+                FROM empleados e
+                JOIN documentos d ON e.nombre = d.usuario
+            `);
+
+            res.render('documentacion/eliminar/selecioanreliminar.hbs', {
+                navopertaivo: true,
+                nombreUsuario,
+                usuarios  // Pasar la lista de usuarios con sus documentos a la vista
+            });
+        } catch (err) {
+            console.error('Error al obtener la lista de usuarios:', err);
+            res.status(500).send('Error interno al cargar la página');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.post("/EliminarDocumentacion", async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { usuario, documentoActualizar } = req.body;
+        const connection = req.db;
+
+        try {
+            // Eliminar el documento seleccionado de la base de datos
+            const updateQuery = `UPDATE documentos SET ${documentoActualizar} = NULL WHERE usuario = ?`;
+
+            await connection.query(updateQuery, [usuario]);
+
+            res.json({ success: true, message: 'Documento eliminado exitosamente.' });
+        } catch (err) {
+            console.error('Error al manejar la eliminación del documento:', err);
+            res.status(500).json({ success: false, message: 'Error interno al procesar la solicitud' });
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
+
+
 app.listen(app.get("port"), () => {
     console.log("Server listening on port ", app.get("port"));  // Iniciar el servidor y escuchar en el puerto especificado
 });

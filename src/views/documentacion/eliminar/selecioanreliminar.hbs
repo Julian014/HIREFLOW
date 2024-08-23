@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Documentación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap");
+
+        body {
+            font-family: "Nunito", sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://example.com/hr-background.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #413d4b;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #413d4b;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            width: 60px;
+            height: 4px;
+            background-color: #90c9a7;
+            display: block;
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        label {
+            font-weight: 700;
+            color: #666567;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #666567;
+            font-size: 1.2rem;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            max-width: 100%;
+            padding: 12px 12px 12px 45px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            color: #333;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: #90c9a7;
+            box-shadow: 0 0 10px rgba(144, 201, 167, 0.4);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #413d4b;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 8px 20px rgba(65, 61, 75, 0.5);
+        }
+
+        button:hover {
+            background-color: #666567;
+            box-shadow: 0 12px 25px rgba(65, 61, 75, 0.7);
+            transform: translateY(-3px);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #413d4b;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #90c9a7;
+            transform: translateY(-3px);
+        }
+
+        /* Efectos adicionales */
+        input[type="text"]:focus, select:focus {
+            border-color: #413d4b;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(65, 61, 75, 0.3);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Eliminar Documentación</h1>
+        <form id="deleteForm">
+            <div class="form-group">
+                <label for="filtroNombre">Filtrar por nombre:</label>
+                <i class="fa fa-search"></i>
+                <input type="text" id="filtroNombre" placeholder="Buscar usuario...">
+            </div>
+            <div class="form-group">
+                <label for="filtroDocumento">Filtrar por número de documento:</label>
+                <i class="fa fa-id-card"></i>
+                <input type="text" id="filtroDocumento" placeholder="Buscar número de documento...">
+            </div>
+            <div class="form-group">
+                <label for="usuario">Seleccione el usuario:</label>
+                <i class="fa fa-user"></i>
+                <select name="usuario" id="usuario" required>
+                    {{#each usuarios}}
+                        <option value="{{this.usuario}}">{{this.usuario}} - {{this.documento}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="documentoActualizar">Seleccione el documento a eliminar:</label>
+                <i class="fa fa-folder-open"></i>
+                <select name="documentoActualizar" id="documentoActualizar" required>
+                    <option value="cedula_path">Cédula</option>
+                    <option value="contratacion_path">Contratación</option>
+                    <option value="titulo_path">Título</option>
+                    <option value="titulo_bachiller_path">Título Bachiller</option>
+                    <option value="certificaciones_path">Certificaciones</option>
+                    <option value="recomendaciones_path">Recomendaciones</option>
+                    <option value="antecedentes_path">Antecedentes</option>
+                    <option value="examen_medico_path">Examen Médico</option>
+                    <option value="foto_path">Foto</option>
+                    <option value="comprobante_domicilio_path">Comprobante de Domicilio</option>
+                    <option value="cesantias_path">Cesantías</option>
+                    <option value="hoja_vida_path">Hoja de Vida</option>
+                    <option value="eps_path">EPS</option>
+                    <option value="libreta_militar_path">Libreta Militar</option>
+                    <option value="contraloria_path">Contraloría</option>
+                </select>
+            </div>
+
+            <button type="submit">Eliminar Documento</button>
+        </form>
+        <a href="/" class="back-link">Volver al inicio</a>
+    </div>
+
+    <script>
+        // Script para filtrar el select de usuarios por nombre
+        document.getElementById('filtroNombre').addEventListener('input', function() {
+            var filter = this.value.toLowerCase();
+            var options = document.getElementById('usuario').options;
+
+            for (var i = 0; i < options.length; i++) {
+                var text = options[i].text.toLowerCase();
+                if (text.includes(filter)) {
+                    options[i].style.display = '';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+        });
+
+        // Script para filtrar el select de usuarios por número de documento
+        document.getElementById('filtroDocumento').addEventListener('input', function() {
+            var filter = this.value.toLowerCase();
+            var options = document.getElementById('usuario').options;
+
+            for (var i = 0; i < options.length; i++) {
+                var text = options[i].text.toLowerCase();
+                if (text.includes(filter)) {
+                    options[i].style.display = '';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+        });
+    </script>
+      <script>
+        document.getElementById('deleteForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevenir el envío del formulario
+
+            fetch('/EliminarDocumentacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    usuario: this.usuario.value,
+                    documentoActualizar: this.documentoActualizar.value
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al procesar la solicitud.');
+            });
+        });
+    </script>
+</body>
+</html>
