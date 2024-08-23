@@ -33,7 +33,8 @@ const pool = mysql.createPool({
     database: 'recursos_humanos',
     waitForConnections: true,
     connectionLimit: 10, // Número máximo de conexiones en el pool
-    queueLimit: 0 // Número máximo de solicitudes en cola (0 = ilimitado)
+    queueLimit: 0,
+    connectTimeout: 10000  // Incrementar a 10 segundos para intentos más largos de conexión    // Número máximo de solicitudes en cola (0 = ilimitado)
 });
 
 // Exporta el pool para usarlo en otros módulos
@@ -818,6 +819,7 @@ const adjustPath = (path) => {
     if (!path) return null;
     return path.replace(/src[\\\/]public[\\\/]/, ''); // Elimina "src/public/" o "src\public\"
 };
+
 app.post("/subirdocumentos", uploadDocumentos.fields([
     { name: 'documentoCedula' }, 
     { name: 'documentoContratacion' }, 
@@ -1666,6 +1668,63 @@ app.get('/descargarTodosDocumentos/:usuario', async (req, res) => {
     }
 });
 
+
+
+app.get('/actualizarDocumentacion', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const connection = req.db;
+        const nombreUsuario = req.session.name;
+
+        try {
+            // Obtener la lista de usuarios
+            const [usuarios] = await connection.query('SELECT id, usuario FROM documentos');
+            
+            res.render('documentacion/actualizar/selecionarparaactualizar.hbs', {
+                navopertaivo: true,
+                nombreUsuario,
+                usuarios  // Pasar la lista de usuarios a la vista
+            });
+        } catch (err) {
+            console.error('Error al obtener la lista de usuarios:', err);
+            res.status(500).send('Error interno al cargar la página');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+app.post("/actualizarDocumentacion", uploadDocumentos.single('documento'), async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { usuario, documentoActualizar } = req.body; 
+        const connection = req.db;
+
+        try {
+            // Asegurarse de que el archivo ha sido subido
+            if (!req.file) {
+                return res.status(400).send('No se ha subido ningún archivo.');
+            }
+
+            // Leer el archivo subido desde el sistema de archivos y convertirlo a binario
+            const archivoActualizado = fs.readFileSync(req.file.path);
+
+            // Actualizar la base de datos con el archivo binario
+            const updateQuery = `UPDATE documentos SET ${documentoActualizar} = ? WHERE id = ?`;
+
+            await connection.query(updateQuery, [archivoActualizado, usuario]);
+
+            res.send('Documento actualizado exitosamente.');
+        } catch (err) {
+            console.error('Error al manejar la actualización del documento:', err);
+            res.status(500).send('Error interno al procesar la solicitud');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
 
 
 app.listen(app.get("port"), () => {

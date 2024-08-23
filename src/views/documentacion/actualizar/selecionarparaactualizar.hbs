@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <h1>Actualizar Documentación</h1>
+<form action="/actualizarDocumentacion" method="post" enctype="multipart/form-data">
+    <label for="usuario">Seleccione el usuario:</label>
+    <select name="usuario" id="usuario" required>
+        {{#each usuarios}}
+            <option value="{{this.id}}">{{this.usuario}}</option>
+        {{/each}}
+    </select>
+
+    <label for="documentoActualizar">Seleccione el documento a actualizar:</label>
+    <select name="documentoActualizar" id="documentoActualizar" required>
+        <option value="cedula_path">Cédula</option>
+        <option value="contratacion_path">Contratación</option>
+        <option value="titulo_path">Título</option>
+        <!-- Agrega más opciones según los documentos disponibles -->
+    </select>
+
+    <label for="documento">Subir nuevo archivo:</label>
+    <input type="file" name="documento" id="documento" accept=".pdf" required>
+
+    <button type="submit">Actualizar Documento</button>
+</form>
+
+
+</body>
+</html>
