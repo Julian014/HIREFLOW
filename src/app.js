@@ -1669,23 +1669,23 @@ app.get('/descargarTodosDocumentos/:usuario', async (req, res) => {
 });
 
 
-
 app.get('/actualizarDocumentacion', async (req, res) => {
     if (req.session.loggedin === true) {
         const connection = req.db;
         const nombreUsuario = req.session.name;
 
         try {
-            // Obtener la lista de usuarios
-            const [usuarios] = await connection.query('SELECT id, usuario FROM documentos');
+            // Obtener la lista de usuarios con sus números de documento
+            const [usuarios] = await connection.query(`
+                SELECT DISTINCT e.nombre AS usuario, e.documento 
+                FROM empleados e
+                JOIN documentos d ON e.nombre = d.usuario
+            `);
 
-
-
-         
             res.render('documentacion/actualizar/selecionarparaactualizar.hbs', {
                 navopertaivo: true,
                 nombreUsuario,
-                usuarios  // Pasar la lista de usuarios a la vista
+                usuarios  // Pasar la lista de usuarios con sus documentos a la vista
             });
         } catch (err) {
             console.error('Error al obtener la lista de usuarios:', err);
