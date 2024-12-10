@@ -10,7 +10,7 @@ const app = express();
 app.set("port", process.env.PORT || 3000);
 // Configure view engine
 app.set("views", __dirname + "/views");
-app.engine(".hbs", engine({ extname: ".hbs" }));  // Configura Handlebars como motor de vistas
+app.engine(".hbs", engine({ extname: ".hbs" }));  
 app.set("view engine", "hbs");
 
 const Handlebars = require('handlebars');
